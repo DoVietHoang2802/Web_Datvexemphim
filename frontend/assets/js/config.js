@@ -4,7 +4,7 @@
 
 const CONFIG = {
   // ========== NGROK URLs (UPDATE HERE) ==========
-  FRONTEND_URL: "http://127.0.0.1:5500/frontend/index.html",  // ngrok http 5500 (Frontend)
+  FRONTEND_URL: "https://web-datvexemphim.vercel.app",  // ngrok http 5500 (Frontend)
   API_BASE: "https://poly-gemmological-agnes.ngrok-free.dev/api",  // ngrok http 9090 (Backend) "https://abc1-ngrok.ngrok.io/api"
   
   // ========== DEV Mode (Local) ==========
