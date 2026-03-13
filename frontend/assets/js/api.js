@@ -39,7 +39,11 @@ async function parseOrThrow(res) {
 
 export async function apiGet(path) {
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json", ...authHeaders() },
+    headers: { 
+      "Content-Type": "application/json", 
+      "ngrok-skip-browser-warning": "true",
+      ...authHeaders() 
+    },
   });
   return parseOrThrow(res);
 }
@@ -47,7 +51,11 @@ export async function apiGet(path) {
 export async function apiPost(path, body) {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
+    headers: { 
+      "Content-Type": "application/json", 
+      "ngrok-skip-browser-warning": "true",
+      ...authHeaders() 
+    },
     body: JSON.stringify(body),
   });
   return parseOrThrow(res);
@@ -56,7 +64,11 @@ export async function apiPost(path, body) {
 export async function apiPut(path, body) {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
+    headers: { 
+      "Content-Type": "application/json", 
+      "ngrok-skip-browser-warning": "true",
+      ...authHeaders() 
+    },
     body: JSON.stringify(body),
   });
   return parseOrThrow(res);
@@ -65,7 +77,11 @@ export async function apiPut(path, body) {
 export async function apiDelete(path) {
   const res = await fetch(`${API_BASE}${path}`, {
     method: "DELETE",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
+    headers: { 
+      "Content-Type": "application/json", 
+      "ngrok-skip-browser-warning": "true",
+      ...authHeaders() 
+    },
   });
   return parseOrThrow(res);
 }
