@@ -47,6 +47,7 @@ D:\Web_datvexemphim\backend\src\main\java\com\datvexemphim\api\dto\publicapi\Sho
 D:\Web_datvexemphim\backend\src\main\java\com\datvexemphim\api\dto\ticket\TicketHistoryDto.java
 D:\Web_datvexemphim\backend\src\main\java\com\datvexemphim\api\dto\ticket\TransferTicketRequest.java
 D:\Web_datvexemphim\backend\src\main\java\com\datvexemphim\api\GlobalExceptionHandler.java
+D:\Web_datvexemphim\backend\src\main\java\com\datvexemphim\config\CorsConfig.java
 D:\Web_datvexemphim\backend\src\main\java\com\datvexemphim\config\DataSeeder.java
 D:\Web_datvexemphim\backend\src\main\java\com\datvexemphim\domain\entity\FoodCategory.java
 D:\Web_datvexemphim\backend\src\main\java\com\datvexemphim\domain\entity\FoodItem.java

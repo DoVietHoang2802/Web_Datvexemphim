@@ -77,6 +77,7 @@ com\datvexemphim\api\dto\food\FoodCategoryDTO.class
 com\datvexemphim\api\dto\admin\RoomUpsertRequest.class
 com\datvexemphim\api\dto\ticket\TicketHistoryDto.class
 com\datvexemphim\service\admin\AdminSeatService.class
+com\datvexemphim\config\CorsConfig.class
 com\datvexemphim\service\admin\AdminStatsService.class
 com\datvexemphim\domain\enums\TicketStatus.class
 com\datvexemphim\service\admin\AdminUserService.class
