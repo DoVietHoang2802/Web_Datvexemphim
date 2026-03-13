@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Vé của tôi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h4 class="mb-0">Lịch sử vé</h4>
+      <a class="btn btn-outline-light btn-sm" href="showtimes.html">Đặt thêm vé</a>
+    </div>
+    <div id="msg"></div>
+    <div class="card p-3">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Phim</th>
+              <th>Suất chiếu</th>
+              <th>Ghế</th>
+              <th>Giá</th>
+              <th>Trạng thái</th>
+              <th>Booking</th>
+              <th class="text-end">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script type="module">
+    import { apiGet, apiPost } from "./assets/js/api.js";
+    import { formatTime, formatVnd, setupNavbar, requireAuth } from "./assets/js/app.js";
+
+    async function loadNavbar(){
+      const html = await fetch("./partials/navbar.html").then(r=>r.text());
+      document.querySelector("#navbar").innerHTML = html;
+      setupNavbar();
+    }
+    function show(msg, type="danger"){
+      document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
+    }
+    function row(t){
+      const statusBadge = t.status === "CONFIRMED"
+        ? `<span class="badge text-bg-success">CONFIRMED</span>`
+        : t.status === "PENDING"
+          ? `<span class="badge text-bg-warning">PENDING</span>`
+          : `<span class="badge text-bg-secondary">CANCELLED</span>`;
+      const canCancel = t.status === "CONFIRMED";
+      const canTransfer = t.status === "CONFIRMED";
+      return `
+        <tr>
+          <td>${t.ticketId}</td>
+          <td>${t.movieTitle}</td>
+          <td>
+            <div class="small">${formatTime(t.startTime)}</div>
+            <div class="text-muted small">${t.roomName}</div>
+          </td>
+          <td class="fw-semibold">${t.seatCode}</td>
+          <td>${formatVnd(t.price)}</td>
+          <td>${statusBadge}</td>
+          <td class="small text-muted">${t.bookingCode || "—"}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-light me-1" data-action="transfer" data-id="${t.ticketId}" ${canTransfer ? "" : "disabled"}>Chuyển</button>
+            <button class="btn btn-sm btn-outline-danger" data-action="cancel" data-id="${t.ticketId}" ${canCancel ? "" : "disabled"}>Hủy</button>
+          </td>
+        </tr>
+      `;
+    }
+    async function refresh(){
+      const list = await apiGet("/tickets/me");
+      document.querySelector("#tbody").innerHTML = list.map(row).join("") || `<tr><td colspan="8" class="text-muted">Chưa có vé.</td></tr>`;
+    }
+    async function main(){
+      requireAuth();
+      await loadNavbar();
+      await refresh();
+      document.querySelector("#tbody").addEventListener("click", async (e)=>{
+        const btn = e.target.closest("button[data-action]");
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const id = Number(btn.dataset.id);
+        try{
+          if(action === "cancel"){
+            if(!confirm("Hủy vé? (chỉ được hủy trước giờ chiếu 30 phút)")) return;
+            await apiPost(`/tickets/${id}/cancel`, {});
+            show("Hủy vé thành công.", "success");
+            await refresh();
+          }
+          if(action === "transfer"){
+            const toEmail = prompt("Nhập email người nhận vé:");
+            if(!toEmail) return;
+            await apiPost(`/tickets/transfer`, { ticketId: id, toEmail });
+            show("Chuyển vé thành công.", "success");
+            await refresh();
+          }
+        }catch(err){
+          show(err.message);
+        }
+      });
+    }
+    main().catch(e=>show(e.message));
+  </script>
+</body>
+</html>
+

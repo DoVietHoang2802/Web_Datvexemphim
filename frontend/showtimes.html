@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Lịch chiếu</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <h4 class="mb-0">Lịch chiếu sắp tới</h4>
+      <div class="text-muted small">Chọn suất chiếu để đặt vé</div>
+    </div>
+    <div id="msg"></div>
+    <div id="list" class="row g-2"></div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/config.js"></script>  <script type="module">
+    import { apiGet } from "./assets/js/api.js";
+    import { formatTime, formatVnd, setupNavbar } from "./assets/js/app.js";
+    async function loadNavbar(){
+      const html = await fetch("./partials/navbar.html").then(r=>r.text());
+      document.querySelector("#navbar").innerHTML = html;
+      setupNavbar();
+    }
+    function show(msg, type="danger"){
+      document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
+    }
+    async function main(){
+      await loadNavbar();
+      const list = await apiGet("/showtimes");
+      document.querySelector("#list").innerHTML = list.map(s=>`
+        <div class="col-12 col-lg-6">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <div>
+                <div class="fw-semibold">${s.movieTitle}</div>
+                <div class="text-muted small">${s.roomName} · ${formatTime(s.startTime)}</div>
+              </div>
+              <div class="text-end">
+                <div class="fw-semibold">${formatVnd(s.price)}</div>
+                <a class="btn btn-sm btn-brand mt-1" href="seatmap.html?showtimeId=${s.id}">Chọn ghế</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join("") || `<div class="col-12"><div class="text-muted">Chưa có suất chiếu.</div></div>`;
+    }
+    main().catch(e=>show(e.message));
+  </script>
+</body>
+</html>
+

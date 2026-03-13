@@ -1,0 +1,28 @@
+server:
+  port: 9090
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/datvexemphim?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
+    username: root
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+
+app:
+  jwt:
+    issuer: datvexemphim
+    # ĐỔI SANG CHUỖI DÀI RIÊNG CỦA BẠN TRƯỚC KHI DEPLOY
+    secret: "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_32+_CHARS"
+    accessTokenMinutes: 240
+
+logging:
+  level:
+    org.hibernate.SQL: warn

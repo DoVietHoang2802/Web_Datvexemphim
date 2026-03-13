@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Đặt đồ ăn & nước uống</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    .food-category-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+    }
+    .food-category-tabs .btn {
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .food-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .food-card:hover {
+      border-color: #94a3b8;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .food-card-img {
+      width: 100%;
+      height: 120px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #cbd5e1;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .food-card-body {
+      padding: 0.75rem;
+    }
+    .food-card-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .food-card-price {
+      color: #dc2626;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    .food-card-qty {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .food-card-qty input {
+      width: 50px;
+      padding: 0.25rem;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+    .food-card-qty button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      line-height: 1;
+    }
+
+    .food-cart {
+      position: sticky;
+      top: 0;
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      z-index: 10;
+    }
+    .food-cart-title {
+      font-weight: bold;
+      margin-bottom: 0.75rem;
+      color: #1e293b;
+    }
+    .food-cart-items {
+      max-height: 150px;
+      overflow-y: auto;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .food-cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      padding-right: 0.5rem;
+    }
+    .food-cart-item-name {
+      flex: 1;
+      color: #475569;
+    }
+    .food-cart-item-qty {
+      color: #64748b;
+      min-width: 30px;
+      text-align: center;
+    }
+    .food-cart-item-price {
+      color: #dc2626;
+      font-weight: bold;
+      min-width: 70px;
+      text-align: right;
+    }
+    .food-cart-remove {
+      color: #94a3b8;
+      cursor: pointer;
+      margin-left: 0.25rem;
+    }
+    .food-cart-remove:hover {
+      color: #dc2626;
+    }
+    .food-cart-total {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      color: #1e293b;
+      margin-bottom: 0.75rem;
+    }
+    .food-cart-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .food-cart-buttons button {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .food-empty-cart {
+      color: #64748b;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .food-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main class="container py-4" style="max-width: 1200px">
+    <div id="msg"></div>
+
+    <div class="row">
+      <div class="col-md-3">
+        <div class="food-cart">
+          <div class="food-cart-title">
+            <i class="fas fa-shopping-cart"></i> Giỏ hàng
+          </div>
+          <div id="cartItems" class="food-cart-items">
+            <div class="food-empty-cart">Chưa chọn đồ ăn</div>
+          </div>
+          <div class="food-cart-total">
+            <span>Tổng:</span>
+            <span id="cartTotal">0 ₫</span>
+          </div>
+          <div class="food-cart-buttons">
+            <button class="btn btn-outline-secondary btn-sm" id="btnClearCart">Xóa tất cả</button>
+            <button class="btn btn-brand btn-sm" id="btnContinue">Tiếp tục thanh toán</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-9">
+        <h4 class="mb-1">Đặt đồ ăn & nước uống</h4>
+        <div class="text-muted small mb-3">Chọn đồ ăn và nước uống yêu thích của bạn</div>
+
+        <!-- Category Tabs -->
+        <div class="food-category-tabs" id="categoryTabs"></div>
+
+        <!-- Food Items Grid -->
+        <div id="foodGrid" class="food-grid"></div>
+
+        <div class="text-center py-4">
+          <p class="text-muted">
+            <i class="fas fa-info-circle"></i>
+            Đồ ăn sẽ được giao cùng vé của bạn. Bạn có thể huỷ đơn đồ ăn trước 15 phút giờ chiếu.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script type="module">
+    import { getFoodCategories, getFoodItems } from "./assets/js/api.js";
+    import { qs, setupNavbar, formatVnd } from "./assets/js/app.js";
+
+    let foodData = [];
+    let selectedFood = new Map();
+    let ticketIds = [];
+    let ticketTotal = 0;
+
+    async function loadNavbar(){
+      const html = await fetch("./partials/navbar.html").then(r=>r.text());
+      document.querySelector("#navbar").innerHTML = html;
+      setupNavbar();
+    }
+
+    function show(msg, type="danger"){
+      document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
+    }
+
+    async function loadFoodCategories(){
+      const categories = await getFoodCategories();
+      const tabsHtml = categories.map(cat => `
+        <button class="btn btn-outline-secondary btn-sm category-tab" data-id="${cat.id}">
+          <i class="${cat.icon}"></i> ${cat.name}
+        </button>
+      `).join("");
+      document.querySelector("#categoryTabs").innerHTML = tabsHtml;
+
+      document.querySelectorAll(".category-tab").forEach((btn, idx) => {
+        if(idx === 0) btn.classList.add("active");
+        btn.addEventListener("click", (e) => {
+          document.querySelectorAll(".category-tab").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          loadFoodItems(Number(btn.dataset.id));
+        });
+      });
+
+      if(categories.length > 0) {
+        loadFoodItems(categories[0].id);
+      }
+    }
+
+    async function loadFoodItems(categoryId){
+      const items = await getFoodItems(categoryId);
+      foodData = items;
+      renderFoodGrid();
+    }
+
+    function renderFoodGrid(){
+      const grid = document.querySelector("#foodGrid");
+      grid.innerHTML = foodData.map(item => {
+        const qty = selectedFood.get(item.id) || 0;
+        return `
+          <div class="food-card">
+            <div class="food-card-img">
+              <i class="fas fa-image"></i>
+            </div>
+            <div class="food-card-body">
+              <div class="food-card-name">${item.name}</div>
+              <div class="food-card-price">${formatVnd(item.price)}</div>
+              <div class="food-card-qty">
+                <button class="btn btn-sm btn-outline-secondary decreaseQty" data-id="${item.id}">−</button>
+                <input type="number" class="form-control form-control-sm qtyInput" data-id="${item.id}" value="${qty}" min="0">
+                <button class="btn btn-sm btn-outline-secondary increaseQty" data-id="${item.id}">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      document.querySelectorAll(".increaseQty").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const id = Number(btn.dataset.id);
+          const current = selectedFood.get(id) || 0;
+          selectedFood.set(id, current + 1);
+          renderFoodGrid();
+          updateCart();
+        });
+      });
+
+      document.querySelectorAll(".decreaseQty").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const id = Number(btn.dataset.id);
+          const current = selectedFood.get(id) || 0;
+          if(current > 0) {
+            selectedFood.set(id, current - 1);
+            renderFoodGrid();
+            updateCart();
+          }
+        });
+      });
+
+      document.querySelectorAll(".qtyInput").forEach(input => {
+        input.addEventListener("change", (e) => {
+          const id = Number(input.dataset.id);
+          const qty = Math.max(0, Number(input.value) || 0);
+          if(qty > 0) selectedFood.set(id, qty);
+          else selectedFood.delete(id);
+          renderFoodGrid();
+          updateCart();
+        });
+      });
+    }
+
+    function updateCart(){
+      const cartItems = document.querySelector("#cartItems");
+      if(selectedFood.size === 0){
+        cartItems.innerHTML = `<div class="food-empty-cart">Chưa chọn đồ ăn</div>`;
+        return;
+      }
+
+      let html = "";
+      let totalFood = 0;
+      selectedFood.forEach((qty, itemId) => {
+        const item = foodData.find(x => x.id === itemId);
+        if(!item) return;
+        const itemTotal = item.price * qty;
+        totalFood += itemTotal;
+        html += `
+          <div class="food-cart-item">
+            <div class="food-cart-item-name">${item.name}</div>
+            <div class="food-cart-item-qty">×${qty}</div>
+            <div class="food-cart-item-price">${formatVnd(itemTotal)}</div>
+            <span class="food-cart-remove" data-id="${itemId}">
+              <i class="fas fa-trash-alt"></i>
+            </span>
+          </div>
+        `;
+      });
+      cartItems.innerHTML = html;
+
+      document.querySelectorAll(".food-cart-remove").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const id = Number(btn.dataset.id);
+          selectedFood.delete(id);
+          renderFoodGrid();
+          updateCart();
+        });
+      });
+
+      const totalGrand = totalFood + ticketTotal;
+      document.querySelector("#cartTotal").textContent = formatVnd(totalFood);
+    }
+
+    async function main(){
+      await loadNavbar();
+      ticketIds = (qs("ticketIds") || "").split(",").map(x => Number(x)).filter(Boolean);
+      ticketTotal = Number(qs("amount") || "0");
+
+      if(!ticketIds.length){
+        show("Thiếu thông tin vé. Vui lòng quay lại đặt vé.");
+        return;
+      }
+
+      try{
+        await loadFoodCategories();
+      }catch(e){
+        show(`Lỗi load đồ ăn: ${e.message}`);
+      }
+
+      document.querySelector("#btnClearCart").addEventListener("click", () => {
+        selectedFood.clear();
+        renderFoodGrid();
+        updateCart();
+      });
+
+      document.querySelector("#btnContinue").addEventListener("click", () => {
+        const q = new URLSearchParams();
+        q.set("ticketIds", ticketIds.join(","));
+        q.set("amount", ticketTotal);
+        const foodParam = Array.from(selectedFood.entries())
+          .map(([id, qty]) => `${id}:${qty}`)
+          .join("|");
+        if(foodParam) q.set("foodItems", foodParam);
+        location.href = `checkout.html?${q.toString()}`;
+      });
+    }
+
+    main().catch(e => show(e.message));
+  </script>
+</body>
+</html>
