@@ -20,7 +20,7 @@ public class MovieService {
 
     public List<MovieSummaryDto> listActive() {
         return movieRepository.findByActiveTrueOrderByIdDesc().stream()
-                .map(m -> new MovieSummaryDto(m.getId(), m.getTitle(), m.getDurationMinutes(), m.getPosterUrl(), m.getRating(), m.getGenre()))
+                .map(m -> new MovieSummaryDto(m.getId(), m.getTitle(), m.getDurationMinutes(), m.getPosterUrl(), m.getRating(), m.getGenre(), m.getGenreId()))
                 .toList();
     }
 
@@ -31,7 +31,7 @@ public class MovieService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie not found");
         }
         return new MovieDetailDto(m.getId(), m.getTitle(), m.getDescription(), m.getDurationMinutes(),
-                m.getPosterUrl(), m.getTrailerUrl(), m.getRating(), m.getGenre());
+                m.getPosterUrl(), m.getTrailerUrl(), m.getRating(), m.getGenre(), m.getGenreId());
     }
 }
 

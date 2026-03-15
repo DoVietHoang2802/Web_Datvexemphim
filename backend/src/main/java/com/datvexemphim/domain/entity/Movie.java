@@ -23,7 +23,11 @@ public class Movie {
 
     private String rating;
 
+    // Genre name (legacy - for backward compatibility)
     private String genre;
+
+    // Genre ID (link to movie_genres table)
+    private Long genreId;
 
     @Column(nullable = false)
     private boolean active = true;
@@ -44,6 +48,8 @@ public class Movie {
     public void setRating(String rating) { this.rating = rating; }
     public String getGenre() { return genre; }
     public void setGenre(String genre) { this.genre = genre; }
+    public Long getGenreId() { return genreId; }
+    public void setGenreId(Long genreId) { this.genreId = genreId; }
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 }

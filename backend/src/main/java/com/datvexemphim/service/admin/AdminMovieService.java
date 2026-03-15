@@ -2,19 +2,25 @@ package com.datvexemphim.service.admin;
 
 import com.datvexemphim.api.dto.admin.MovieUpsertRequest;
 import com.datvexemphim.domain.entity.Movie;
+import com.datvexemphim.domain.entity.MovieGenre;
+import com.datvexemphim.domain.repository.MovieGenreRepository;
 import com.datvexemphim.domain.repository.MovieRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminMovieService {
     private final MovieRepository movieRepository;
+    private final MovieGenreRepository movieGenreRepository;
 
-    public AdminMovieService(MovieRepository movieRepository) {
+    public AdminMovieService(MovieRepository movieRepository, MovieGenreRepository movieGenreRepository) {
         this.movieRepository = movieRepository;
+        this.movieGenreRepository = movieGenreRepository;
     }
 
     public List<Movie> list() {
@@ -49,7 +55,7 @@ public class AdminMovieService {
         m.setPosterUrl(req.posterUrl());
         m.setTrailerUrl(req.trailerUrl());
         m.setRating(req.rating());
-        m.setGenre(req.genre());
+        m.setGenreId(req.genreId());
         m.setActive(Boolean.TRUE.equals(req.active()));
     }
 }

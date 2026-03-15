@@ -8,7 +8,8 @@ public record MovieDetailDto(
         String posterUrl,
         String trailerUrl,
         String rating,
-        String genre
+        String genre,
+        Long genreId
 ) {
 }
 

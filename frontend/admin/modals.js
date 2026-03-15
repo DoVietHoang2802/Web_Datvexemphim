@@ -3,8 +3,38 @@
  * Provides reusable modal functions for admin pages
  */
 
-export function showMovieModal(defaults, onSubmit) {
+export async function showMovieModal(defaults, onSubmit) {
   const modalId = "movieModal";
+
+  // Lấy danh sách genres từ API
+  let genresOptions = '<option value="">-- Chọn thể loại --</option>';
+  try {
+    const token = localStorage.getItem("token");
+    const response = await fetch(`${window.API_BASE}/admin/movies/genres`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (response.ok) {
+      const genres = await response.json();
+      genresOptions += genres.map(g =>
+        `<option value="${g.id}" ${defaults?.genreId == g.id ? 'selected' : ''}>${g.name}</option>`
+      ).join('');
+    }
+  } catch (e) {
+    console.error("Error loading genres:", e);
+    // Fallback nếu không load được
+    genresOptions = `
+      <option value="">-- Chọn thể loại --</option>
+      <option value="1">Hành động</option>
+      <option value="2">Tình cảm</option>
+      <option value="3">Hài hước</option>
+      <option value="4">Kinh dị</option>
+      <option value="5">Khoa học viễn tưởng</option>
+      <option value="6">Phiêu lưu</option>
+      <option value="7">Hoạt hình</option>
+      <option value="8">Khác</option>
+    `;
+  }
+
   const html = `
     <div class="modal fade" id="${modalId}" tabindex="-1">
       <div class="modal-dialog">
@@ -41,17 +71,8 @@ export function showMovieModal(defaults, onSubmit) {
               </div>
               <div class="mb-3">
                 <label class="form-label">Thể loại</label>
-                <select class="form-select" name="genre">
-                  <option value="">-- Chọn thể loại --</option>
-                  <option value="Hành động" ${defaults?.genre === 'Hành động' ? 'selected' : ''}>Hành động</option>
-                  <option value="Tình cảm" ${defaults?.genre === 'Tình cảm' ? 'selected' : ''}>Tình cảm</option>
-                  <option value="Hài hước" ${defaults?.genre === 'Hài hước' ? 'selected' : ''}>Hài hước</option>
-                  <option value="Kinh dị" ${defaults?.genre === 'Kinh dị' ? 'selected' : ''}>Kinh dị</option>
-                  <option value="Khoa học viễn tưởng" ${defaults?.genre === 'Khoa học viễn tưởng' ? 'selected' : ''}>Khoa học viễn tưởng</option>
-                  <option value="Phiêu lưu" ${defaults?.genre === 'Phiêu lưu' ? 'selected' : ''}>Phiêu lưu</option>
-                  <option value="Hoạt hình" ${defaults?.genre === 'Hoạt hình' ? 'selected' : ''}>Hoạt hình</option>
-                  <option value="Tài liệu" ${defaults?.genre === 'Tài liệu' ? 'selected' : ''}>Tài liệu</option>
-                  <option value="Khác" ${defaults?.genre === 'Khác' ? 'selected' : ''}>Khác</option>
+                <select class="form-select" name="genreId">
+                  ${genresOptions}
                 </select>
               </div>
               <div class="mb-3">
