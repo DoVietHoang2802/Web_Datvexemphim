@@ -6,32 +6,390 @@
   <title>Admin Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="../assets/css/style.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    /* Card Styles */
+    .dashboard-card {
+      background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .dashboard-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .dashboard-card .card-body {
+      padding: 1.5rem;
+    }
+
+    /* Revenue Card */
+    .revenue-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+    }
+    .revenue-card:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    /* Stats Cards */
+    .stat-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--accent-color, #667eea);
+      border-radius: 4px 0 0 4px;
+    }
+    .stat-card .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .stat-card .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .stat-card .stat-label {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.75rem;
+    }
+    .quick-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #fff;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+    }
+    .quick-action-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateX(4px);
+      color: #fff;
+    }
+    .quick-action-btn i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Recent Activities */
+    .activities-card {
+      background: linear-gradient(145deg, #1a1a2e 0%, #16213e 100%);
+    }
+    .activities-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .activities-header h5 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .activities-list {
+      max-height: 400px;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    .activities-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .activities-list::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+    }
+    .activities-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s ease;
+    }
+    .activity-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .activity-item.selected {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: rgba(102, 126, 234, 0.4);
+    }
+    .activity-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #667eea;
+    }
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .activity-icon.ticket { background: rgba(102, 126, 234, 0.2); color: #667eea; }
+    .activity-icon.payment { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
+    .activity-icon.cancel { background: rgba(245, 101, 101, 0.2); color: #f56565; }
+    .activity-icon.transfer { background: rgba(237, 137, 54, 0.2); color: #ed8936; }
+    .activity-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .activity-title {
+      font-weight: 600;
+      color: #fff;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .activity-meta {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 0.25rem;
+    }
+    .activity-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .activity-status {
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .activity-status.success { background: rgba(72, 187, 120, 0.2); color: #48bb78; }
+    .activity-status.pending { background: rgba(237, 137, 54, 0.2); color: #ed8936; }
+    .activity-status.cancelled { background: rgba(245, 101, 101, 0.2); color: #f56565; }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    /* Delete Button */
+    .btn-delete-selected {
+      background: rgba(245, 101, 101, 0.2);
+      border: 1px solid rgba(245, 101, 101, 0.3);
+      color: #f56565;
+      padding: 0.375rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      transition: all 0.2s ease;
+    }
+    .btn-delete-selected:hover {
+      background: rgba(245, 101, 101, 0.3);
+      color: #fff;
+    }
+    .btn-delete-selected:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Checkbox styling */
+    .delete-mode .activity-item {
+      padding-left: 0.5rem;
+    }
+    .delete-mode .activity-checkbox {
+      display: block;
+    }
+    .activity-checkbox {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <div id="navbar"></div>
 
   <main class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4 class="mb-0">Bảng điều khiển</h4>
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h3 class="mb-1">📊 Bảng điều khiển</h3>
+        <p class="text-muted mb-0 small">Tổng quan hệ thống đặt vé xem phim</p>
+      </div>
       <div class="text-muted small">Doanh thu tính theo payments SUCCESS</div>
     </div>
+
     <div id="msg"></div>
-    <div class="row g-3">
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4">
+      <!-- Revenue -->
       <div class="col-md-4">
-        <div class="card p-3">
-          <div class="text-muted small">Tổng doanh thu</div>
-          <div class="fw-bold fs-3" id="revenue">—</div>
+        <div class="dashboard-card revenue-card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <div class="text-white-50 small">💰 Tổng doanh thu</div>
+                <div class="fs-2 fw-bold text-white" id="revenue">—</div>
+              </div>
+              <div class="stat-icon bg-white bg-opacity-20">
+                <i class="fas fa-chart-line text-white"></i>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="col-md-8">
-        <div class="card p-3">
-          <div class="fw-semibold">Tác vụ nhanh</div>
-          <div class="d-flex gap-2 flex-wrap mt-2">
-            <a class="btn btn-outline-light btn-sm" href="movies.html">Quản lý phim</a>
-            <a class="btn btn-outline-light btn-sm" href="rooms.html">Quản lý phòng/ghế</a>
-            <a class="btn btn-outline-light btn-sm" href="showtimes.html">Quản lý lịch chiếu</a>
-            <a class="btn btn-outline-light btn-sm" href="food.html">Quản lý thực phẩm</a>
-            <a class="btn btn-outline-light btn-sm" href="tickets.html">Xem vé</a>
+
+      <!-- Movies -->
+      <div class="col-md-2">
+        <div class="dashboard-card stat-card" style="--accent-color: #f56565;">
+          <div class="card-body">
+            <div class="stat-icon" style="background: rgba(245, 101, 101, 0.2); color: #f56565;">
+              <i class="fas fa-film"></i>
+            </div>
+            <div class="stat-value" id="movieCount">—</div>
+            <div class="stat-label">Phim</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rooms -->
+      <div class="col-md-2">
+        <div class="dashboard-card stat-card" style="--accent-color: #48bb78;">
+          <div class="card-body">
+            <div class="stat-icon" style="background: rgba(72, 187, 120, 0.2); color: #48bb78;">
+              <i class="fas fa-building"></i>
+            </div>
+            <div class="stat-value" id="roomCount">—</div>
+            <div class="stat-label">Phòng</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Showtimes -->
+      <div class="col-md-2">
+        <div class="dashboard-card stat-card" style="--accent-color: #ed8936;">
+          <div class="card-body">
+            <div class="stat-icon" style="background: rgba(237, 137, 54, 0.2); color: #ed8936;">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-value" id="showtimeCount">—</div>
+            <div class="stat-label">Suất chiếu</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tickets -->
+      <div class="col-md-2">
+        <div class="dashboard-card stat-card" style="--accent-color: #667eea;">
+          <div class="card-body">
+            <div class="stat-icon" style="background: rgba(102, 126, 234, 0.2); color: #667eea;">
+              <i class="fas fa-ticket-alt"></i>
+            </div>
+            <div class="stat-value" id="ticketCount">—</div>
+            <div class="stat-label">Vé đã bán</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="dashboard-card mb-4">
+      <div class="card-body">
+        <div class="fw-semibold mb-3" style="color: rgba(255,255,255,0.9);">
+          <i class="fas fa-bolt me-2" style="color: #ffd700;"></i>⚡ Tác vụ nhanh
+        </div>
+        <div class="quick-actions">
+          <a class="quick-action-btn" href="movies.html">
+            <i class="fas fa-film" style="color: #f56565;"></i> 🎬 Phim
+          </a>
+          <a class="quick-action-btn" href="genres.html">
+            <i class="fas fa-tags" style="color: #667eea;"></i> 🏷️ Thể loại
+          </a>
+          <a class="quick-action-btn" href="rooms.html">
+            <i class="fas fa-building" style="color: #48bb78;"></i> 🏢 Phòng
+          </a>
+          <a class="quick-action-btn" href="showtimes.html">
+            <i class="fas fa-clock" style="color: #ed8936;"></i> ⏰ Lịch chiếu
+          </a>
+          <a class="quick-action-btn" href="tickets.html">
+            <i class="fas fa-ticket-alt" style="color: #667eea;"></i> 🎫 Vé
+          </a>
+          <a class="quick-action-btn" href="food.html">
+            <i class="fas fa-utensils" style="color: #9f7aea;"></i> 🍿 Thực phẩm
+          </a>
+          <a class="quick-action-btn" href="users.html">
+            <i class="fas fa-users" style="color: #38b2ac;"></i> 👥 Người dùng
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="dashboard-card activities-card">
+      <div class="card-body">
+        <div class="activities-header">
+          <h5 style="color: rgba(255,255,255,0.9);">
+            <i class="fas fa-history" style="color: #667eea;"></i> 📋 Hoạt động gần đây
+          </h5>
+          <div class="d-flex gap-2">
+            <button class="btn-delete-selected" id="btnDeleteSelected" disabled>
+              <i class="fas fa-trash-alt me-1"></i> Xóa đã chọn
+            </button>
+            <button class="btn btn-outline-light btn-sm" id="btnToggleDelete">
+              <i class="fas fa-check-square me-1"></i> Chọn
+            </button>
+          </div>
+        </div>
+        <div class="activities-list" id="activitiesList">
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <div>Chưa có hoạt động nào gần đây</div>
           </div>
         </div>
       </div>
@@ -39,24 +397,209 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="/assets/js/config.js"></script>
   <script type="module">
-    import { apiGet } from "../assets/js/api.js";
-    import { formatVnd } from "../assets/js/app.js";
+    import { apiGet, apiDelete } from "../assets/js/api.js";
+    import { formatVnd, formatTime } from "../assets/js/app.js";
     import { requireAdmin, loadAdminNavbar } from "./admin.js";
+
+    let activities = [];
+    let deleteMode = false;
 
     function show(msg, type="danger"){
       document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
     }
 
+    function getActivityIcon(type) {
+      const icons = {
+        'TICKET': '<i class="fas fa-ticket-alt"></i>',
+        'PAYMENT': '<i class="fas fa-money-bill-wave"></i>',
+        'CANCEL': '<i class="fas fa-times-circle"></i>',
+        'TRANSFER': '<i class="fas fa-exchange-alt"></i>'
+      };
+      return icons[type] || '<i class="fas fa-bell"></i>';
+    }
+
+    function getActivityIconClass(type) {
+      const classes = {
+        'TICKET': 'ticket',
+        'PAYMENT': 'payment',
+        'CANCEL': 'cancel',
+        'TRANSFER': 'transfer'
+      };
+      return classes[type] || 'ticket';
+    }
+
+    function getStatusClass(status) {
+      const classes = {
+        'SUCCESS': 'success',
+        'PENDING': 'pending',
+        'CANCELLED': 'cancelled',
+        'ACTIVE': 'success'
+      };
+      return classes[status] || 'pending';
+    }
+
+    function renderActivities() {
+      const list = document.querySelector("#activitiesList");
+      const btnDelete = document.querySelector("#btnDeleteSelected");
+
+      if (!activities.length) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <div>Chưa có hoạt động nào gần đây</div>
+          </div>
+        `;
+        return;
+      }
+
+      list.innerHTML = activities.map((a, index) => `
+        <div class="activity-item" data-index="${index}">
+          <input type="checkbox" class="activity-checkbox" data-index="${index}">
+          <div class="activity-icon ${getActivityIconClass(a.type)}">
+            ${getActivityIcon(a.type)}
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">${a.movieTitle || 'Phim'}</div>
+            <div class="activity-meta">
+              <span>💺 ${a.seatName || '-'}</span>
+              <span>👤 ${a.userName || '-'}</span>
+              <span>🕐 ${a.showtime || '-'}</span>
+            </div>
+          </div>
+          <span class="activity-status ${getStatusClass(a.status)}">${a.status}</span>
+        </div>
+      `).join('');
+
+      updateDeleteButton();
+    }
+
+    function updateDeleteButton() {
+      const btnDelete = document.querySelector("#btnDeleteSelected");
+      const checkboxes = document.querySelectorAll(".activity-checkbox:checked");
+      btnDelete.disabled = checkboxes.length === 0;
+      btnDelete.textContent = `🗑️ Xóa đã chọn (${checkboxes.length})`;
+    }
+
+    function toggleDeleteMode() {
+      deleteMode = !deleteMode;
+      const list = document.querySelector("#activitiesList");
+      const btn = document.querySelector("#btnToggleDelete");
+      const btnDelete = document.querySelector("#btnDeleteSelected");
+
+      if (deleteMode) {
+        list.classList.add("delete-mode");
+        btn.innerHTML = '<i class="fas fa-times me-1"></i> Hủy';
+        btn.classList.replace("btn-outline-light", "btn-outline-secondary");
+      } else {
+        list.classList.remove("delete-mode");
+        btn.innerHTML = '<i class="fas fa-check-square me-1"></i> Chọn';
+        btn.classList.replace("btn-outline-secondary", "btn-outline-light");
+        // Uncheck all
+        document.querySelectorAll(".activity-checkbox").forEach(cb => cb.checked = false);
+      }
+      updateDeleteButton();
+    }
+
+    async function deleteSelected() {
+      const checkboxes = document.querySelectorAll(".activity-checkbox:checked");
+      const indices = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index));
+
+      if (indices.length === 0) return;
+
+      if (!confirm(`Xóa ${indices.length} hoạt động đã chọn?`)) return;
+
+      // Sort indices in descending order to avoid index shifting
+      indices.sort((a, b) => b - a);
+      indices.forEach(index => {
+        activities.splice(index, 1);
+      });
+
+      renderActivities();
+      toggleDeleteMode();
+    }
+
+    async function loadStats() {
+      try {
+        const stats = await apiGet("/admin/stats/revenue");
+        document.querySelector("#revenue").textContent = formatVnd(stats.totalRevenue || 0);
+      } catch (e) {
+        document.querySelector("#revenue").textContent = formatVnd(0);
+      }
+
+      try {
+        const movies = await apiGet("/admin/movies");
+        document.querySelector("#movieCount").textContent = movies.length;
+      } catch (e) {
+        document.querySelector("#movieCount").textContent = "0";
+      }
+
+      try {
+        const rooms = await apiGet("/admin/rooms");
+        document.querySelector("#roomCount").textContent = rooms.length;
+      } catch (e) {
+        document.querySelector("#roomCount").textContent = "0";
+      }
+
+      try {
+        const showtimes = await apiGet("/admin/showtimes");
+        document.querySelector("#showtimeCount").textContent = showtimes.length;
+      } catch (e) {
+        document.querySelector("#showtimeCount").textContent = "0";
+      }
+
+      try {
+        const tickets = await apiGet("/admin/tickets");
+        document.querySelector("#ticketCount").textContent = tickets.length;
+      } catch (e) {
+        document.querySelector("#ticketCount").textContent = "0";
+      }
+    }
+
+    async function loadActivities() {
+      // Load recent tickets as activities
+      try {
+        const tickets = await apiGet("/admin/tickets");
+        activities = tickets.slice(0, 20).map(t => ({
+          type: 'TICKET',
+          movieTitle: t.movieTitle || 'Phim',
+          seatName: t.seatName || '-',
+          userName: t.userName || '-',
+          showtime: t.startTime ? formatTime(t.startTime) : '-',
+          status: t.status || 'ACTIVE'
+        }));
+      } catch (e) {
+        activities = [];
+      }
+      renderActivities();
+    }
+
     async function main(){
       requireAdmin();
       await loadAdminNavbar();
-      const stats = await apiGet("/admin/stats/revenue");
-      document.querySelector("#revenue").textContent = formatVnd(stats.totalRevenue);
+
+      await loadStats();
+      await loadActivities();
+
+      // Event listeners
+      document.querySelector("#btnToggleDelete").addEventListener("click", toggleDeleteMode);
+      document.querySelector("#btnDeleteSelected").addEventListener("click", deleteSelected);
+
+      document.querySelector("#activitiesList").addEventListener("change", (e) => {
+        if (e.target.classList.contains("activity-checkbox")) {
+          const item = e.target.closest(".activity-item");
+          if (e.target.checked) {
+            item.classList.add("selected");
+          } else {
+            item.classList.remove("selected");
+          }
+          updateDeleteButton();
+        }
+      });
     }
     main().catch(e=>show(e.message));
   </script>
 </body>
 </html>
-
