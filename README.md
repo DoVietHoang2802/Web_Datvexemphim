@@ -1,140 +1,371 @@
-# Web đặt vé xem phim (Spring Boot + MySQL + Bootstrap)
+# 🎬 Website Đặt Vé Xem Phim - DatVeXemPhim
 
-## 1) Công nghệ
+## 📋 Tổng quan dự án
 
-- **Backend**: Java 17, Spring Boot, Spring Security (JWT), JPA/Hibernate, REST API
-- **Database**: MySQL (Laragon local)
-- **Frontend**: HTML/CSS/JavaScript + Bootstrap (gọi API qua `fetch`)
+Đây là hệ thống website đặt vé xem phim trực tuyến, cho phép người dùng:
+- Đăng ký/Đăng nhập tài khoản
+- Xem danh sách phim và lịch chiếu
+- Chọn ghế ngồi trong rạp
+- Đặt vé và thanh toán trực tuyến
+- Hủy vé và chuyển vé cho người khác
+- Đặt đồ ăn/thức uống kèm theo vé
 
-## 2) Cấu trúc project
+---
+
+## 🛠 Công nghệ sử dụng
+
+### Backend
+| Công nghệ | Phiên bản | Mô tả |
+|-----------|-----------|-------|
+| Java | 17 | Ngôn ngữ lập trình |
+| Spring Boot | 3.3.4 | Framework phát triển ứng dụng Java |
+| Spring Security | 6.x | Bảo mật & Xác thực người dùng |
+| JWT | - | JSON Web Token cho xác thực |
+| JPA/Hibernate | 6.x | ORM để tương tác database |
+| REST API | - | Giao diện lập trình |
+
+### Frontend
+| Công nghệ | Mô tả |
+|-----------|-------|
+| HTML5 | Cấu trúc trang web |
+| CSS3 | Styling giao diện |
+| JavaScript (ES6+) | Xử lý logic phía client |
+| Bootstrap 5.3 | Framework CSS cho giao diện |
+| Fetch API | Gọi API từ server |
+
+### Database & Deployment
+| Service | Mô tả |
+|---------|-------|
+| MySQL | Hệ quản trị cơ sở dữ liệu |
+| Railway | Nền tảng deploy MySQL |
+| Vercel | Nền tảng deploy Frontend |
+| GitHub | Quản lý mã nguồn |
+
+---
+
+## 📁 Cấu trúc dự án
 
 ```
-backend/   (Spring Boot - Controller → Service → Repository → Entity)
-frontend/  (static HTML/CSS/JS/Bootstrap)
+web_datvexemphim/
+├── backend/                    # Spring Boot API
+│   ├── src/main/java/com/datvexemphim/
+│   │   ├── api/
+│   │   │   ├── controller/    # REST Controllers
+│   │   │   ├── dto/          # Data Transfer Objects
+│   │   │   └── GlobalExceptionHandler.java
+│   │   ├── config/
+│   │   │   └── DataSeeder.java
+│   │   ├── domain/
+│   │   │   ├── entity/       # JPA Entities
+│   │   │   ├── repository/   # JPA Repositories
+│   │   │   └── enums/        # Enumerations
+│   │   ├── security/         # JWT & Security
+│   │   │   ├── JwtService.java
+│   │   │   ├── JwtAuthFilter.java
+│   │   │   ├── SecurityConfig.java
+│   │   │   └── CustomUserDetailsService.java
+│   │   └── service/          # Business Logic
+│   │       ├── admin/        # Admin services
+│   │       └── *.java        # User services
+│   └── src/main/resources/
+│       └── application.yml   # Cấu hình ứng dụng
+│
+├── frontend/                  # Static HTML/JS/CSS
+│   ├── index.html            # Trang chủ
+│   ├── movie.html            # Chi tiết phim
+│   ├── showtimes.html        # Lịch chiếu
+│   ├── seatmap.html          # Chọn ghế
+│   ├── checkout.html         # Thanh toán
+│   ├── tickets.html          # Lịch sử vé
+│   ├── food.html             # Đồ ăn/thức uống
+│   ├── login.html            # Đăng nhập
+│   ├── register.html         # Đăng ký
+│   ├── admin/                # Trang quản trị
+│   │   ├── dashboard.html
+│   │   ├── movies.html
+│   │   ├── rooms.html
+│   │   ├── showtimes.html
+│   │   ├── tickets.html
+│   │   ├── users.html
+│   │   └── food.html
+│   └── assets/
+│       ├── css/              # Styles
+│       ├── js/               # JavaScript
+│       │   └── config.js     # Cấu hình API
+│       └── images/
+│
+├── database/                  # SQL scripts
+│   └── *.sql                 # Database migrations
+│
+├── Dockerfile                 # Docker configuration
+├── render.yaml               # Render deployment config
+├── railway.json              # Railway deployment config
+└── README.md                # Tài liệu này
 ```
 
-## 3) Thiết kế database (JPA tạo bảng)
+---
 
-Các bảng chính (tương ứng entity):
+## 🗄 Thiết kế Database
 
-- `users`
-- `movies`
-- `rooms`
-- `seats`
-- `showtimes`
-- `tickets`
-- `payments`
-- `transfer_history`
+### Sơ đồ các bảng
 
-Điểm quan trọng:
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│    users    │     │   movies    │     │    rooms    │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ id          │     │ id          │     │ id          │
+│ email       │     │ title       │     │ name        │
+│ password    │     │ duration    │     │ totalSeats  │
+│ fullName    │     │ posterUrl   │     │ rows        │
+│ phone       │     │ rating      │     │ cols        │
+│ role        │     │ description │     └──────┬──────┘
+│ createdAt   │     │ isActive   │            │
+└──────┬──────┘     └─────────────┘            │
+       │                                      │
+       ▼                                      ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   seats     │     │ showtimes   │     │   tickets   │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ id          │     │ id          │     │ id          │
+│ roomId  (FK)│◄───│ movieId (FK)│     │ showtimeId(FK)
+│ row         │     │ roomId  (FK)│     │ seatId   (FK)│
+│ col         │     │ startTime   │     │ userId   (FK)│
+│ seatType    │     │ price       │     │ status       │
+│ isAvailable │     │ status      │     │ createdAt    │
+└─────────────┘     └─────────────┘     └──────┬──────┘
+                                               │
+┌─────────────┐     ┌─────────────┐            │
+│  payments   │     │transferHistory          │
+├─────────────┤     ├─────────────┤            │
+│ id          │     │ id          │            │
+│ ticketId(FK)│◄───┤ ticketId(FK)│            │
+│ amount      │     │ fromUserId  │            │
+│ method      │     │ toUserId    │            │
+│ status      │     │ transferredAt            │
+│ paidAt      │     └─────────────┘            │
+└─────────────┘                                │
+                                                ▼
+                                        ┌─────────────┐
+                                        │ food_order  │
+                                        ├─────────────┤
+                                        │ id          │
+                                        │ ticketId(FK)│
+                                        │ userId   (FK)│
+                                        │ totalAmount │
+                                        │ status      │
+                                        └─────────────┘
+```
 
-- **Chống đặt trùng ghế**: bảng `tickets` có **unique constraint** `uk_ticket_showtime_seat(showtime_id, seat_id)`.
-- **Giải phóng ghế khi thanh toán FAIL**: hệ thống **xóa ticket PENDING** tương ứng.
-- **Hủy vé trước 30 phút**: chỉ hủy được khi `now < startTime - 30 phút`.
+### Danh sách các bảng
 
-## 4) Chạy MySQL bằng Laragon
+| Bảng | Mô tả |
+|------|-------|
+| `users` | Thông tin người dùng (user/admin) |
+| `movies` | Danh sách phim |
+| `rooms` | Các phòng chiếu |
+| `seats` | Ghế ngồi trong từng phòng |
+| `showtimes` | Suất chiếu (phim + phòng + giờ) |
+| `tickets` | Vé đã đặt |
+| `payments` | Thông tin thanh toán |
+| `transfer_history` | Lịch sử chuyển vé |
+| `food_category` | Danh mục đồ ăn |
+| `food_item` | Sản phẩm đồ ăn |
+| `food_order` | Đơn đồ ăn |
+| `food_order_item` | Chi tiết đơn đồ ăn |
 
-1. Mở Laragon → Start (Apache + MySQL)
-2. Mặc định MySQL Laragon:
-   - host: `localhost`
-   - port: `3306`
-   - user: `root`
-   - password: *(trống)*
-3. Backend sẽ tự tạo DB `datvexemphim` nhờ:
-   - `createDatabaseIfNotExist=true`
-   - `spring.jpa.hibernate.ddl-auto=update`
+---
 
-Nếu máy bạn có mật khẩu root, sửa trong:
+## 🚀 Cách chạy dự án
 
-- `backend/src/main/resources/application.yml`
+### Chạy Local (Development)
 
-## 5) Chạy Backend
+#### 1. Yêu cầu
+- JDK 17 trở lên
+- Maven 3.6+
+- MySQL (Laragon hoặc cài đặt riêng)
 
-Yêu cầu:
+#### 2. Cấu hình Database
 
-- Cài **JDK 17**
-- Có `java` trong PATH
+Mở `backend/src/main/resources/application.yml`:
 
-Chạy:
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/datvexemphim
+    username: root
+    password: YOUR_PASSWORD
+```
 
-```bat
+#### 3. Chạy Backend
+
+```bash
 cd backend
-.\mvnw.cmd spring-boot:run
+./mvnw spring-boot:run
 ```
 
-Backend chạy tại:
+Backend chạy tại: `http://localhost:9090`
 
+#### 4. Chạy Frontend
 
+Cách 1 - Dùng Live Server (VSCode):
+- Cài đặt extension "Live Server"
+- Mở `frontend/index.html` → Click "Go Live"
 
-Seeder (tự chạy lần đầu):
-
-- Tạo admin: **`admin@local / 123456`**
-- Tạo 1 room + seats + 1 movie + 1 showtime sắp tới
-
-## 6) Chạy Frontend
-
-Frontend là static nên cần chạy qua web server (không nên mở file `.html` trực tiếp vì có `fetch`).
-
-Cách dễ nhất:
-
-- Dùng VSCode extension **Live Server**
-- Mở `frontend/index.html` bằng Live Server
-
-Hoặc dùng Python:
-
+Cách 2 - Dùng Python:
 ```bash
 cd frontend
 python -m http.server 5500
 ```
 
-chay du an
-mo laragon 
-.\mvnw spring-boot:run
- lenh dong tat ca cong 
- taskkill /F /IM java.exe
- chaynrok
- huong dan nam trong file config.js nằm trong frontend /assets/js/configs
-Sau đó mở:
+Frontend chạy tại: `http://localhost:5500`
 
-- `http://localhost:5500/index.html`
+#### 5. Tài khoản mặc định
 
-## 7) Luồng chức năng chính (User)
+| Loại | Email | Mật khẩu |
+|------|-------|----------|
+| Admin | admin@local | 123456 |
 
-1. **Đăng ký** → `/api/auth/register`
-2. **Đăng nhập** → `/api/auth/login` (nhận JWT, frontend lưu `localStorage`)
-3. **Xem phim** → `/api/movies`
-4. **Chi tiết phim** → `/api/movies/{id}`
-5. **Xem lịch chiếu** → `/api/showtimes` hoặc `/api/showtimes/movie/{movieId}`
-6. **Xem sơ đồ ghế** → `/api/seatmap/{showtimeId}`
-7. **Đặt vé (giữ ghế PENDING)** → `POST /api/bookings`
-8. **Thanh toán mô phỏng** → `POST /api/payments/simulate`
-   - `success=true` → ticket `CONFIRMED`
-   - `success=false` → ticket PENDING bị xóa (mở lại ghế)
-9. **Lịch sử vé** → `/api/tickets/me`
-10. **Hủy vé** → `POST /api/tickets/{ticketId}/cancel` (trước giờ chiếu 30 phút)
-11. **Chuyển vé** → `POST /api/tickets/transfer`
+---
 
-## 8) Admin
+### Deploy lên Production
 
-Đăng nhập admin để gọi các API `/api/admin/**` (role ADMIN).
+#### 1. Deploy Database (Railway MySQL)
 
-Frontend admin:
+1. Đăng nhập [railway.app](https://railway.app)
+2. Tạo **New Project** → **MySQL**
+3. Copy các biến môi trường:
+   - `MYSQLHOST`
+   - `MYSQLPORT`
+   - `MYSQL_DATABASE`
+   - `MYSQLUSER`
+   - `MYSQLPASSWORD`
 
-- `frontend/admin/dashboard.html`
+#### 2. Deploy Backend (Railway)
 
-Các API chính:
+1. Tạo **New Project** → **Deploy from GitHub**
+2. Chọn repo `web_datvexemphim`
+3. Thêm các biến môi trường:
+   - `MYSQLHOST`: `${{MySQL.MYSQLHOST}}`
+   - `MYSQLPORT`: `${{MySQL.MYSQLPORT}}`
+   - `MYSQL_DATABASE`: `${{MySQL.MYSQLDATABASE}}`
+   - `MYSQLUSER`: `${{MySQL.MYSQLUSER}}`
+   - `MYSQLPASSWORD`: `${{MySQL.MYSQLPASSWORD}}`
+   - `APP_JWT_SECRET`: (chuỗi bí mật của bạn)
+4. Click **Deploy**
 
-- Movies: `/api/admin/movies`
-- Rooms: `/api/admin/rooms` + `/api/admin/rooms/generate-seats`
-- Seats: `/api/admin/seats/room/{roomId}`
-- Showtimes: `/api/admin/showtimes`
-- Tickets: `/api/admin/tickets`
-- Users: `/api/admin/users`
-- Revenue: `/api/admin/stats/revenue`
+#### 3. Deploy Frontend (Vercel)
 
-## 9) Ghi chú kỹ thuật
+1. Đăng nhập [vercel.com](https://vercel.com)
+2. Import repo `web_datvexemphim`
+3. Thư mục deploy: `frontend`
+4. Cập nhật `frontend/assets/js/config.js`:
+   ```javascript
+   API_BASE: "https://your-railway-app.up.railway.app/api"
+   ```
+5. Deploy
 
-- **Transaction**: tạo tickets PENDING và simulate payment đều chạy trong transaction.
-- **Chống trùng ghế**: có cả check sớm + ràng buộc unique ở DB (chống race-condition khi nhiều người đặt cùng lúc).
-- **CORS**: controller có `@CrossOrigin` để frontend local gọi được API.
+---
 
+## 📡 API Endpoints
+
+### Authentication
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/auth/register` | Đăng ký tài khoản |
+| POST | `/api/auth/login` | Đăng nhập |
+
+### Movies
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/movies` | Lấy danh sách phim |
+| GET | `/api/movies/{id}` | Chi tiết phim |
+
+### Showtimes
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/showtimes` | Tất cả suất chiếu |
+| GET | `/api/showtimes/movie/{movieId}` | Suất chiếu theo phim |
+
+### Seat Map
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/seatmap/{showtimeId}` | Sơ đồ ghế |
+
+### Booking
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/bookings` | Đặt vé |
+| GET | `/api/tickets/me` | Lịch sử vé của tôi |
+| POST | `/api/tickets/{id}/cancel` | Hủy vé |
+| POST | `/api/tickets/transfer` | Chuyển vé |
+
+### Payment
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/payments/simulate` | Mô phỏng thanh toán |
+
+### Food & Drink
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/food/categories` | Danh mục đồ ăn |
+| GET | `/api/food/items` | Sản phẩm đồ ăn |
+| POST | `/api/food/orders` | Đặt đồ ăn |
+
+### Admin APIs
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET/POST/PUT/DELETE | `/api/admin/movies` | Quản lý phim |
+| GET/POST/PUT/DELETE | `/api/admin/rooms` | Quản lý phòng |
+| GET/POST/PUT/DELETE | `/api/admin/showtimes` | Quản lý suất chiếu |
+| GET/POST/PUT/DELETE | `/api/admin/food/categories` | Quản lý danh mục |
+| GET/POST/PUT/DELETE | `/api/admin/food/items` | Quản lý sản phẩm |
+| GET | `/api/admin/stats/revenue` | Thống kê doanh thu |
+
+---
+
+## 🔧 Tính năng đặc biệt
+
+### 1. Chống đặt trùng ghế
+- Sử dụng **unique constraint** ở database: `uk_ticket_showtime_seat`
+- Kiểm tra trước khi đặt trong code
+- Chống race-condition khi nhiều người đặt cùng lúc
+
+### 2. Giải phóng ghế khi thanh toán thất bại
+- Khi thanh toán thất bại, hệ thống **xóa ticket PENDING**
+- Ghế sẽ được giải phóng để người khác có thể đặt
+
+### 3. Hủy vé linh hoạt
+- Chỉ hủy được khi `now < startTime - 30 phút`
+- Không hoàn tiền tự động
+
+### 4. Chuyển vé cho người khác
+- Cho phép chuyển vé đã mua cho người khác
+- **Food order đi kèm cũng được chuyển theo**
+- Lưu lịch sử chuyển vé
+
+### 5. Đặt đồ ăn kèm theo vé
+- Tích hợp đặt đồ ăn/thức uống trong quá trình thanh toán
+- Tính tổng tiền vé + đồ ăn
+
+---
+
+## 📝 Ghi chú kỹ thuật
+
+- **Transaction**: Các thao tác tạo vé và thanh toán đều chạy trong transaction để đảm bảo tính toàn vẹn dữ liệu
+- **JWT**: Sử dụng JWT cho xác thực người dùng, token lưu trong localStorage
+- **CORS**: Cấu hình CORS cho phép frontend gọi API từ các domain khác nhau
+- **Security**: Phân quyền user/admin thông qua Spring Security
+
+---
+
+## 📞 Thông tin liên hệ
+
+- **Tác giả**: Đỗ Việt Hoàng
+- **Email**: aboys16t@gmail.com
+- **GitHub**: https://github.com/your-username/web_datvexemphim
+
+---
+
+## 📄 License
+
+Dự án được tạo cho mục đích học tập và demo.
