@@ -6,9 +6,12 @@
 - Đăng ký/Đăng nhập tài khoản
 - Xem danh sách phim và lịch chiếu
 - Chọn ghế ngồi trong rạp
-- Đặt vé và thanh toán trực tuyến
+- Đặt vé và thanh toán trực tuyến (mô phỏng)
 - Hủy vé và chuyển vé cho người khác
 - Đặt đồ ăn/thức uống kèm theo vé
+- Đánh giá phim sau khi xem
+- Sử dụng mã giảm giá (voucher)
+- Quản lý hồ sơ cá nhân
 
 ---
 
@@ -37,7 +40,7 @@
 | Service | Mô tả |
 |---------|-------|
 | MySQL | Hệ quản trị cơ sở dữ liệu |
-| Railway | Nền tảng deploy MySQL |
+| Railway | Nền tảng deploy MySQL & Backend |
 | Vercel | Nền tảng deploy Frontend |
 | GitHub | Quản lý mã nguồn |
 
@@ -72,22 +75,25 @@ web_datvexemphim/
 │
 ├── frontend/                  # Static HTML/JS/CSS
 │   ├── index.html            # Trang chủ
-│   ├── movie.html            # Chi tiết phim
+│   ├── movie.html            # Chi tiết phim + Đánh giá
 │   ├── showtimes.html        # Lịch chiếu
 │   ├── seatmap.html          # Chọn ghế
-│   ├── checkout.html         # Thanh toán
+│   ├── checkout.html         # Thanh toán + Voucher
 │   ├── tickets.html          # Lịch sử vé
 │   ├── food.html             # Đồ ăn/thức uống
+│   ├── profile.html          # Hồ sơ người dùng ⭐ NEW
 │   ├── login.html            # Đăng nhập
 │   ├── register.html         # Đăng ký
-│   ├── admin/                # Trang quản trị
+│   ├── admin/               # Trang quản trị
 │   │   ├── dashboard.html
 │   │   ├── movies.html
+│   │   ├── genres.html      # Quản lý thể loại
 │   │   ├── rooms.html
 │   │   ├── showtimes.html
 │   │   ├── tickets.html
 │   │   ├── users.html
-│   │   └── food.html
+│   │   ├── food.html
+│   │   └── vouchers.html    # Quản lý voucher ⭐ NEW
 │   └── assets/
 │       ├── css/              # Styles
 │       ├── js/               # JavaScript
@@ -118,42 +124,56 @@ web_datvexemphim/
 │ password    │     │ duration    │     │ totalSeats  │
 │ fullName    │     │ posterUrl   │     │ rows        │
 │ phone       │     │ rating      │     │ cols        │
-│ role        │     │ description │     └──────┬──────┘
+│ avatarUrl   │     │ genreId     │     └──────┬──────┘
+│ role        │     │ description │            │
 │ createdAt   │     │ isActive   │            │
-└──────┬──────┘     └─────────────┘            │
-       │                                      │
-       ▼                                      ▼
+└──────┬──────┘     └──────┬──────┘            │
+       │                    │                    │
+       ▼                    ▼                    ▼
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   seats     │     │ showtimes   │     │   tickets   │
+│ movie_genres│     │ showtimes   │     │   seats     │
 ├─────────────┤     ├─────────────┤     ├─────────────┤
 │ id          │     │ id          │     │ id          │
-│ roomId  (FK)│◄───│ movieId (FK)│     │ showtimeId(FK)
-│ row         │     │ roomId  (FK)│     │ seatId   (FK)│
-│ col         │     │ startTime   │     │ userId   (FK)│
-│ seatType    │     │ price       │     │ status       │
-│ isAvailable │     │ status      │     │ createdAt    │
-└─────────────┘     └─────────────┘     └──────┬──────┘
-                                               │
-┌─────────────┐     ┌─────────────┐            │
-│  payments   │     │transferHistory          │
-├─────────────┤     ├─────────────┤            │
-│ id          │     │ id          │            │
-│ ticketId(FK)│◄───┤ ticketId(FK)│            │
-│ amount      │     │ fromUserId  │            │
-│ method      │     │ toUserId    │            │
-│ status      │     │ transferredAt            │
-│ paidAt      │     └─────────────┘            │
-└─────────────┘                                │
-                                                ▼
-                                        ┌─────────────┐
-                                        │ food_order  │
-                                        ├─────────────┤
-                                        │ id          │
-                                        │ ticketId(FK)│
-                                        │ userId   (FK)│
-                                        │ totalAmount │
-                                        │ status      │
-                                        └─────────────┘
+│ name        │     │ movieId (FK)│     │ roomId  (FK)│
+│ description │     │ roomId  (FK)│     │ row         │
+│ isActive    │     │ startTime   │     │ col         │
+└─────────────┘     │ price       │     │ seatType    │
+                    │ status      │     │ isAvailable │
+                    └──────┬──────┘     └─────────────┘
+                           │
+                           ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   tickets   │     │  payments   │     │    users    │
+├─────────────┤     ├─────────────┤     ├─────────────┤
+│ id          │     │ id          │     │ id          │
+│ showtimeId(FK)│   │ ticketId(FK)│     │ fullName    │
+│ seatId   (FK)│    │ amount      │     │ email       │
+│ userId   (FK)│    │ method      │     │ phone       │
+│ status       │     │ status      │     │ avatarUrl   │
+│ createdAt    │     │ paidAt      │     │ role       │
+└──────┬──────┘     └─────────────┘     └─────────────┘
+       │
+       ▼
+┌─────────────┐     ┌─────────────┐
+│transferHistory          │ vouchers   │ ⭐ NEW
+├─────────────┤     ├─────────────┤
+│ id          │     │ id          │
+│ ticketId(FK)│     │ code        │
+│ fromUserId  │     │ description │
+│ toUserId    │     │ discountPercent
+│ transferredAt│     │ maxDiscount │
+└─────────────┘     │ minOrderAmount
+                    │ validFrom
+┌─────────────┐     │ validUntil
+│ movie_reviews│ ⭐ NEW     │ usageLimit
+├─────────────┤     │ usedCount   │
+│ id          │     │ isActive    │
+│ movieId (FK)│     └─────────────┘
+│ userId (FK) │
+│ rating      │
+│ comment     │
+│ createdAt   │
+└─────────────┘
 ```
 
 ### Danh sách các bảng
@@ -162,12 +182,15 @@ web_datvexemphim/
 |------|-------|
 | `users` | Thông tin người dùng (user/admin) |
 | `movies` | Danh sách phim |
+| `movie_genres` | Thể loại phim |
 | `rooms` | Các phòng chiếu |
 | `seats` | Ghế ngồi trong từng phòng |
 | `showtimes` | Suất chiếu (phim + phòng + giờ) |
 | `tickets` | Vé đã đặt |
 | `payments` | Thông tin thanh toán |
 | `transfer_history` | Lịch sử chuyển vé |
+| `movie_reviews` | Đánh giá phim ⭐ NEW |
+| `vouchers` | Mã giảm giá ⭐ NEW |
 | `food_category` | Danh mục đồ ăn |
 | `food_item` | Sản phẩm đồ ăn |
 | `food_order` | Đơn đồ ăn |
@@ -274,11 +297,32 @@ Frontend chạy tại: `http://localhost:5500`
 | POST | `/api/auth/register` | Đăng ký tài khoản |
 | POST | `/api/auth/login` | Đăng nhập |
 
+### User Profile ⭐ NEW
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/user/profile` | Lấy thông tin hồ sơ |
+| PUT | `/api/user/profile` | Cập nhật hồ sơ |
+| POST | `/api/user/change-password` | Đổi mật khẩu |
+
 ### Movies
 | Method | Endpoint | Mô tả |
 |--------|----------|-------|
 | GET | `/api/movies` | Lấy danh sách phim |
 | GET | `/api/movies/{id}` | Chi tiết phim |
+| GET | `/api/movies/genres` | Danh sách thể loại |
+
+### Movie Reviews ⭐ NEW
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| GET | `/api/movies/{id}/reviews` | Lấy đánh giá của phim |
+| GET | `/api/movies/{id}/reviews/stats` | Thống kê rating |
+| POST | `/api/movies/reviews` | Gửi đánh giá |
+| DELETE | `/api/movies/reviews/{id}` | Xóa đánh giá |
+
+### Vouchers ⭐ NEW
+| Method | Endpoint | Mô tả |
+|--------|----------|-------|
+| POST | `/api/vouchers/validate` | Kiểm tra & áp dụng voucher |
 
 ### Showtimes
 | Method | Endpoint | Mô tả |
@@ -315,11 +359,99 @@ Frontend chạy tại: `http://localhost:5500`
 | Method | Endpoint | Mô tả |
 |--------|----------|-------|
 | GET/POST/PUT/DELETE | `/api/admin/movies` | Quản lý phim |
+| GET/POST/PUT/DELETE | `/api/admin/movies/genres` | Quản lý thể loại |
 | GET/POST/PUT/DELETE | `/api/admin/rooms` | Quản lý phòng |
 | GET/POST/PUT/DELETE | `/api/admin/showtimes` | Quản lý suất chiếu |
 | GET/POST/PUT/DELETE | `/api/admin/food/categories` | Quản lý danh mục |
 | GET/POST/PUT/DELETE | `/api/admin/food/items` | Quản lý sản phẩm |
+| GET/POST/PUT/DELETE | `/api/admin/vouchers` | Quản lý voucher ⭐ NEW |
 | GET | `/api/admin/stats/revenue` | Thống kê doanh thu |
+
+---
+
+## 🎨 UI Effects & Design Patterns
+
+Dưới đây là các hiệu ứng UI được sử dụng trong dự án:
+
+### 1. Gradient Background cho Cards
+```css
+background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%);
+```
+
+### 2. Border transparent mờ
+```css
+border: 1px solid rgba(255, 255, 255, 0.08);
+```
+
+### 3. Box Shadow đa tầng
+```css
+box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+```
+
+### 4. Cubic-bezier Transition (mượt hơn ease)
+```css
+transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+```
+
+### 5. Hiệu ứng Shimmer (ánh sáng chạy qua)
+```css
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+}
+.card:hover::after {
+  left: 100%;
+  transition: left 0.5s ease;
+}
+```
+
+### 6. Gradient Border Top khi Hover
+```css
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+  background-size: 200% 100%;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.card:hover::before {
+  opacity: 1;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+```
+
+### 7. Transform Scale + Translate khi Hover
+```css
+.card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+```
+
+### 8. Accent Color qua CSS Variable
+```css
+.stat-card {
+  --accent-color: #f56566;
+}
+.stat-card::before {
+  background: var(--accent-color);
+}
+```
 
 ---
 
@@ -347,6 +479,21 @@ Frontend chạy tại: `http://localhost:5500`
 - Tích hợp đặt đồ ăn/thức uống trong quá trình thanh toán
 - Tính tổng tiền vé + đồ ăn
 
+### 6. Mã giảm giá (Voucher) ⭐ NEW
+- Admin tạo/quản lý voucher
+- Người dùng nhập mã khi thanh toán
+- Hỗ trợ: giảm %, giới hạn sử dụng, thời hạn
+
+### 7. Đánh giá phim ⭐ NEW
+- Người dùng đánh giá 1-5 sao
+- Bình luận phim
+- Hiển thị thống kê rating (trung bình, phân bố)
+
+### 8. Hồ sơ người dùng ⭐ NEW
+- Chỉnh sửa thông tin cá nhân
+- Thay đổi avatar
+- Đổi mật khẩu
+
 ---
 
 ## 📝 Ghi chú kỹ thuật
@@ -355,14 +502,15 @@ Frontend chạy tại: `http://localhost:5500`
 - **JWT**: Sử dụng JWT cho xác thực người dùng, token lưu trong localStorage
 - **CORS**: Cấu hình CORS cho phép frontend gọi API từ các domain khác nhau
 - **Security**: Phân quyền user/admin thông qua Spring Security
+- **Database**: Sử dụng `ddl-auto: update` để tự động tạo/cập nhật bảng
 
 ---
 
 ## 📞 Thông tin liên hệ
 
 - **Tác giả**: Đỗ Việt Hoàng
-- **Email**: aboys16t@gmail.com
-- **GitHub**: https://github.com/your-username/web_datvexemphim
+- **Email**: doviethoang281202@gmail.com
+- **GitHub**: https://github.com/hoangdv2002/web_datvexemphim
 
 ---
 
