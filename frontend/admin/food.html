@@ -463,10 +463,30 @@
     // ========== CATEGORIES ==========
     async function loadCategories() {
       try {
+        const token = getToken();
+        console.log('Token:', token ? token.substring(0, 20) + '...' : 'NULL');
+
         const response = await fetch(`${API_BASE}/admin/food/categories`, {
-          headers: { 'Authorization': `Bearer ${getToken()}` }
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          }
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        console.log('Categories response status:', response.status);
+        console.log('Categories response headers:', response.headers.get('content-type'));
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error('Error response:', text.substring(0, 200));
+          throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error(`Expected JSON but got: ${contentType}`);
+        }
+
         allCategories = await response.json();
         renderCategories();
         populateCategoryFilter();
@@ -556,7 +576,10 @@
       try {
         const response = await fetch(url, {
           method,
-          headers: { 'Authorization': `Bearer ${getToken()}` }
+          headers: { 
+            'Authorization': `Bearer ${getToken()}`,
+            'ngrok-skip-browser-warning': 'true'
+          }
         });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -578,7 +601,10 @@
       try {
         const response = await fetch(`${API_BASE}/admin/food/categories/${categoryId}`, {
           method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${getToken()}` }
+          headers: { 
+            'Authorization': `Bearer ${getToken()}`,
+            'ngrok-skip-browser-warning': 'true'
+          }
         });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -593,10 +619,30 @@
     // ========== ITEMS ==========
     async function loadItems() {
       try {
+        const token = getToken();
+        console.log('Token for items:', token ? token.substring(0, 20) + '...' : 'NULL');
+
         const response = await fetch(`${API_BASE}/admin/food/items`, {
-          headers: { 'Authorization': `Bearer ${getToken()}` }
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          }
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        console.log('Items response status:', response.status);
+        console.log('Items response headers:', response.headers.get('content-type'));
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error('Error response:', text.substring(0, 200));
+          throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error(`Expected JSON but got: ${contentType}`);
+        }
+
         allItems = await response.json();
         filterAndRenderItems();
       } catch (error) {
@@ -818,7 +864,10 @@
       try {
         const response = await fetch(url, {
           method,
-          headers: { 'Authorization': `Bearer ${getToken()}` }
+          headers: { 
+            'Authorization': `Bearer ${getToken()}`,
+            'ngrok-skip-browser-warning': 'true'
+          }
         });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -842,7 +891,10 @@
       try {
         const response = await fetch(`${API_BASE}/admin/food/items/${itemId}`, {
           method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${getToken()}` }
+          headers: { 
+            'Authorization': `Bearer ${getToken()}`,
+            'ngrok-skip-browser-warning': 'true'
+          }
         });
 
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
