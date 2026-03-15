@@ -39,7 +39,9 @@ public class ShowtimeService {
                 s.getRoom().getName(),
                 s.getStartTime(),
                 s.getEndTime(),
-                s.getPrice()
+                s.getPrice(),
+                s.getMovie().getGenre(),
+                s.getMovie().getPosterUrl()
         );
     }
 }

@@ -10,7 +10,9 @@ public record ShowtimeDto(
         String roomName,
         Instant startTime,
         Instant endTime,
-        Long price
+        Long price,
+        String genre,
+        String posterUrl
 ) {
 }
 

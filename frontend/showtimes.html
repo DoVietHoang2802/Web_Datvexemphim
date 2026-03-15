@@ -6,52 +6,294 @@
   <title>Lịch chiếu</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    .showtime-card {
+      background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .showtime-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border-color: rgba(102, 126, 234, 0.3);
+    }
+    .showtime-poster {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .showtime-poster-placeholder {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .showtime-content {
+      padding: 1rem;
+    }
+    .showtime-title {
+      font-weight: 700;
+      color: #fff;
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+    .showtime-genre {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .showtime-info {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+    }
+    .showtime-price {
+      font-weight: 700;
+      color: #48bb78;
+      font-size: 1.1rem;
+    }
+    .filter-section {
+      background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .filter-section .form-control,
+    .filter-section .form-select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 8px;
+    }
+    .filter-section .form-control:focus,
+    .filter-section .form-select:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #667eea;
+      color: #fff;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+    .filter-section .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    .filter-section .form-select option {
+      background: #1e1e2f;
+      color: #fff;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    .no-poster {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .no-poster i {
+      font-size: 3rem;
+      color: rgba(255, 255, 255, 0.3);
+    }
+  </style>
 </head>
 <body>
   <div id="navbar"></div>
 
   <main class="container py-4">
-    <div class="d-flex align-items-center justify-content-between mb-2">
-      <h4 class="mb-0">Lịch chiếu sắp tới</h4>
-      <div class="text-muted small">Chọn suất chiếu để đặt vé</div>
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h3 class="mb-1">🎬 Lịch chiếu</h3>
+        <p class="text-muted mb-0 small">Chọn suất chiếu để đặt vé</p>
+      </div>
     </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="text-white-50 small mb-1">🔍 Tìm kiếm theo tên phim</label>
+          <input type="text" class="form-control" id="searchInput" placeholder="Nhập tên phim...">
+        </div>
+        <div class="col-md-3">
+          <label class="text-white-50 small mb-1">🏷️ Lọc theo thể loại</label>
+          <select class="form-select" id="genreFilter">
+            <option value="">Tất cả thể loại</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="text-white-50 small mb-1">💰 Lọc theo giá</label>
+          <select class="form-select" id="priceFilter">
+            <option value="">Tất cả giá</option>
+            <option value="0-50000">Dưới 50.000đ</option>
+            <option value="50000-80000">50.000đ - 80.000đ</option>
+            <option value="80000-100000">80.000đ - 100.000đ</option>
+            <option value="100000-999999">Trên 100.000đ</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-outline-light w-100" id="clearFilter">
+            <i class="fas fa-times"></i> Xóa lọc
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div id="msg"></div>
-    <div id="list" class="row g-2"></div>
+    <div id="list" class="row g-3"></div>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="/assets/js/config.js"></script>  <script type="module">
+  <script src="/assets/js/config.js"></script>
+  <script type="module">
     import { apiGet } from "./assets/js/api.js";
     import { formatTime, formatVnd, setupNavbar } from "./assets/js/app.js";
+
+    let allShowtimes = [];
+    let genres = [];
+
     async function loadNavbar(){
       const html = await fetch("./partials/navbar.html").then(r=>r.text());
       document.querySelector("#navbar").innerHTML = html;
       setupNavbar();
     }
+
     function show(msg, type="danger"){
       document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
     }
-    async function main(){
-      await loadNavbar();
-      const list = await apiGet("/showtimes");
-      document.querySelector("#list").innerHTML = list.map(s=>`
-        <div class="col-12 col-lg-6">
-          <div class="card p-3">
-            <div class="d-flex justify-content-between align-items-start gap-2">
-              <div>
-                <div class="fw-semibold">${s.movieTitle}</div>
-                <div class="text-muted small">${s.roomName} · ${formatTime(s.startTime)}</div>
+
+    function getGenreIcon(genre) {
+      const icons = {
+        'Hành động': 'fa-fist-raised',
+        'Tình cảm': 'fa-heart',
+        'Hài hước': 'fa-laugh-beam',
+        'Kinh dị': 'fa-skull-crossbones',
+        'Khoa học viễn tưởng': 'fa-rocket',
+        'Phiêu lưu': 'fa-compass',
+        'Hoạt hình': 'fa-film',
+        'Khác': 'fa-theater-masks'
+      };
+      return icons[genre] || 'fa-film';
+    }
+
+    function filterShowtimes() {
+      const search = document.querySelector("#searchInput").value.toLowerCase();
+      const genre = document.querySelector("#genreFilter").value;
+      const priceRange = document.querySelector("#priceFilter").value;
+
+      let filtered = allShowtimes.filter(s => {
+        // Search by movie title
+        if (search && !s.movieTitle.toLowerCase().includes(search)) {
+          return false;
+        }
+
+        // Filter by genre
+        if (genre && s.genre !== genre) {
+          return false;
+        }
+
+        // Filter by price
+        if (priceRange) {
+          const [min, max] = priceRange.split('-').map(Number);
+          if (s.price < min || s.price > max) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      renderShowtimes(filtered);
+    }
+
+    function renderShowtimes(list) {
+      if (!list.length) {
+        document.querySelector("#list").innerHTML = `
+          <div class="col-12">
+            <div class="empty-state">
+              <i class="fas fa-film"></i>
+              <div>Không tìm thấy suất chiếu nào</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      document.querySelector("#list").innerHTML = list.map(s => `
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="showtime-card">
+            ${s.posterUrl ?
+              `<img class="showtime-poster" src="${s.posterUrl}" alt="${s.movieTitle}" onerror="this.parentElement.innerHTML='<div class=\\'no-poster\\'><i class=\\'fas fa-film\\'></i></div>'">` :
+              `<div class="no-poster"><i class="fas fa-film"></i></div>`
+            }
+            <div class="showtime-content">
+              <div class="showtime-title">${s.movieTitle}</div>
+              ${s.genre ? `<span class="showtime-genre"><i class="fas ${getGenreIcon(s.genre)}"></i> ${s.genre}</span>` : ''}
+              <div class="showtime-info mb-2">
+                <i class="fas fa-door"></i> ${s.roomName} &nbsp;
+                <i class="fas fa-clock"></i> ${formatTime(s.startTime)}
               </div>
-              <div class="text-end">
-                <div class="fw-semibold">${formatVnd(s.price)}</div>
-                <a class="btn btn-sm btn-brand mt-1" href="seatmap.html?showtimeId=${s.id}">Chọn ghế</a>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="showtime-price">${formatVnd(s.price)}</span>
+                <a class="btn btn-brand btn-sm" href="seatmap.html?showtimeId=${s.id}">
+                  <i class="fas fa-ticket-alt"></i> Đặt vé
+                </a>
               </div>
             </div>
           </div>
         </div>
-      `).join("") || `<div class="col-12"><div class="text-muted">Chưa có suất chiếu.</div></div>`;
+      `).join("");
+    }
+
+    async function main(){
+      await loadNavbar();
+
+      // Load genres for filter
+      try {
+        genres = await apiGet("/movies/genres");
+        const genreSelect = document.querySelector("#genreFilter");
+        genres.forEach(g => {
+          const option = document.createElement("option");
+          option.value = g.name;
+          option.textContent = g.name;
+          genreSelect.appendChild(option);
+        });
+      } catch(e) {
+        console.log("No genres loaded");
+      }
+
+      // Load showtimes - đã có genre và posterUrl từ API
+      allShowtimes = await apiGet("/showtimes");
+
+      renderShowtimes(allShowtimes);
+
+      // Setup filter events
+      document.querySelector("#searchInput").addEventListener("input", filterShowtimes);
+      document.querySelector("#genreFilter").addEventListener("change", filterShowtimes);
+      document.querySelector("#priceFilter").addEventListener("change", filterShowtimes);
+      document.querySelector("#clearFilter").addEventListener("click", () => {
+        document.querySelector("#searchInput").value = "";
+        document.querySelector("#genreFilter").value = "";
+        document.querySelector("#priceFilter").value = "";
+        renderShowtimes(allShowtimes);
+      });
     }
     main().catch(e=>show(e.message));
   </script>
 </body>
 </html>
-
