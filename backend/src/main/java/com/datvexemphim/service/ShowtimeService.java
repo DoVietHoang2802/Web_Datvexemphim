@@ -25,7 +25,8 @@ public class ShowtimeService {
 
     @Transactional
     public List<ShowtimeDto> listUpcomingAll() {
-        return showtimeRepository.findByStartTimeAfterOrderByStartTimeAsc(Instant.now())
+        // Hiển thị tất cả suất chiếu trong ngày hôm nay và tương lai
+        return showtimeRepository.findByStartTimeAfterOrderByStartTimeAsc(Instant.now().minusSeconds(3600))
                 .stream().map(this::toDto).toList();
     }
 
