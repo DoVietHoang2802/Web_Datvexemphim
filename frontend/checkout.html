@@ -6,19 +6,23 @@
   <title>Thanh toán (mô phỏng)</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/css/style.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
     .checkout-section {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.5rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
       padding: 1rem;
       margin-bottom: 1rem;
     }
     .checkout-section-title {
-      font-weight: bold;
-      color: #1e293b;
+      font-weight: 600;
+      color: #fff;
       margin-bottom: 0.75rem;
       font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .checkout-item {
       display: flex;
@@ -26,8 +30,8 @@
       font-size: 0.9rem;
       margin-bottom: 0.5rem;
       padding-bottom: 0.5rem;
-      border-bottom: 1px solid #e2e8f0;
-      color: #000; /* thêm dòng này */
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.8);
     }
     .checkout-item:last-child {
       border-bottom: none;
@@ -38,9 +42,34 @@
       display: flex;
       justify-content: space-between;
       font-weight: bold;
-      color: #1e293b;
+      color: #fff;
       padding-top: 0.5rem;
-      border-top: 2px solid #e2e8f0;
+      border-top: 2px solid rgba(255,255,255,0.1);
+    }
+    .voucher-input-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .voucher-input-group .form-control {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+    }
+    .voucher-input-group .form-control:focus {
+      background: rgba(255,255,255,0.1);
+      border-color: #667eea;
+      color: #fff;
+    }
+    .voucher-success {
+      background: rgba(72, 187, 120, 0.1);
+      border: 1px solid rgba(72, 187, 120, 0.3);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .discount-row {
+      color: #48bb78 !important;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -49,15 +78,15 @@
 
   <main class="container py-4" style="max-width:760px">
     <div id="msg"></div>
-    <div class="card p-4">
-      <h4 class="mb-1">Xác nhận thanh toán</h4>
+    <div class="card p-4" style="background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%); border: 1px solid rgba(255,255,255,0.08);">
+      <h4 class="mb-1 text-white">Xác nhận thanh toán</h4>
       <div class="text-muted small">Kiểm tra lại thông tin trước khi thanh toán</div>
       <hr class="border-secondary"/>
 
       <!-- Tickets Section -->
       <div class="checkout-section">
         <div class="checkout-section-title">
-          <i class="fas fa-ticket"></i> Vé xem phim
+          <i class="fas fa-ticket-alt" style="color: #667eea;"></i> Vé xem phim
         </div>
         <div id="ticketsInfo"></div>
         <div class="checkout-item" style="padding-top: 0.5rem;">
@@ -69,7 +98,7 @@
       <!-- Food Section (if any) -->
       <div id="foodSection" class="checkout-section" style="display:none;">
         <div class="checkout-section-title">
-          <i class="fas fa-utensils"></i> Đồ ăn & nước uống
+          <i class="fas fa-utensils" style="color: #9f7aea;"></i> Đồ ăn & nước uống
         </div>
         <div id="foodInfo"></div>
         <div class="checkout-item" style="padding-top: 0.5rem;">
@@ -78,10 +107,22 @@
         </div>
       </div>
 
+      <!-- Voucher Section -->
+      <div class="checkout-section">
+        <div class="checkout-section-title">
+          <i class="fas fa-tags" style="color: #ed8936;"></i> Mã giảm giá
+        </div>
+        <div class="voucher-input-group">
+          <input type="text" class="form-control" id="voucherCode" placeholder="Nhập mã voucher...">
+          <button class="btn btn-outline-light" id="btnApplyVoucher">Áp dụng</button>
+        </div>
+        <div id="voucherResult"></div>
+      </div>
+
       <!-- Grand Total -->
-      <div class="checkout-total-row mb-3 p-3" style="background: #fef2f2; border-radius: 0.5rem;">
+      <div class="checkout-total-row mb-3 p-3" style="background: rgba(102, 126, 234, 0.2); border-radius: 0.5rem;">
         <span>TỔNG CỘNG:</span>
-        <span id="totalAmount" style="color: #dc2626; font-size: 1.1rem;"></span>
+        <span id="totalAmount" style="color: #667eea; font-size: 1.1rem;"></span>
       </div>
 
       <div class="mt-3 d-flex gap-2 flex-wrap">
@@ -96,6 +137,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="/assets/js/config.js"></script>
   <script type="module">
     import { apiGet, apiPost, createFoodOrder } from "./assets/js/api.js";
@@ -105,6 +147,8 @@
     let foodItems = [];
     let ticketAmount = 0;
     let foodAmount = 0;
+    let appliedVoucher = null;
+    let discountAmount = 0;
 
     async function loadNavbar(){
       const html = await fetch("./partials/navbar.html").then(r=>r.text());
@@ -116,9 +160,15 @@
       document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
     }
 
+    function updateTotal() {
+      const subtotal = ticketAmount + foodAmount;
+      const grandTotal = Math.max(0, subtotal - discountAmount);
+      document.querySelector("#totalAmount").textContent = formatVnd(grandTotal);
+    }
+
     function renderCheckout(){
       // Tickets
-      document.querySelector("#ticketsInfo").innerHTML = ticketIds.map(id => 
+      document.querySelector("#ticketsInfo").innerHTML = ticketIds.map(id =>
         `<div class="checkout-item"><span>Vé ID: ${id}</span></div>`
       ).join("");
       document.querySelector("#ticketsTotal").textContent = formatVnd(ticketAmount);
@@ -152,19 +202,76 @@
         foodAmount = totalFood;
       }
 
-      // Total
-      const grandTotal = ticketAmount + foodAmount;
-      document.querySelector("#totalAmount").textContent = formatVnd(grandTotal);
+      updateTotal();
     }
+
+    // Apply voucher
+    document.querySelector("#btnApplyVoucher")?.addEventListener("click", async () => {
+      const code = document.querySelector("#voucherCode").value.trim();
+      if (!code) {
+        show("Vui lòng nhập mã voucher!");
+        return;
+      }
+
+      const orderAmount = ticketAmount + foodAmount;
+
+      try {
+        const res = await apiPost("/vouchers/validate", {
+          voucherCode: code,
+          orderAmount: orderAmount
+        });
+
+        if (res.valid) {
+          appliedVoucher = {
+            code: res.code,
+            discountAmount: res.discountAmount
+          };
+          discountAmount = res.discountAmount;
+
+          document.querySelector("#voucherResult").innerHTML = `
+            <div class="voucher-success">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fas fa-check-circle text-success me-2"></i>
+                  <span class="text-success fw-bold">${res.code}</span>
+                  <span class="text-muted ms-2">- ${formatVnd(res.discountAmount)}</span>
+                </div>
+                <button class="btn btn-sm btn-outline-danger" id="btnRemoveVoucher">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="small text-muted mt-1">${res.description}</div>
+            </div>
+          `;
+
+          document.querySelector("#btnRemoveVoucher")?.addEventListener("click", () => {
+            appliedVoucher = null;
+            discountAmount = 0;
+            document.querySelector("#voucherResult").innerHTML = "";
+            document.querySelector("#voucherCode").value = "";
+            updateTotal();
+          });
+
+          updateTotal();
+          show("Áp dụng voucher thành công!", "success");
+        }
+      } catch (e) {
+        show(e.message);
+        appliedVoucher = null;
+        discountAmount = 0;
+        document.querySelector("#voucherResult").innerHTML = "";
+        updateTotal();
+      }
+    });
 
     async function pay(success){
       try{
         // Disable buttons
         document.querySelector("#btnSuccess").disabled = true;
         document.querySelector("#btnFail").disabled = true;
-        
+
         const res = await apiPost("/payments/simulate", { ticketIds, success });
-        
+
         // If payment success, create food order (only if payment succeeded)
         if(success && foodItems.length > 0){
           try{
@@ -177,7 +284,6 @@
             await createFoodOrder(apiFood, ticketIds[0], res.paymentId);
           }catch(e){
             console.warn("Food order failed:", e);
-            // Food order failed, nhưng vé đã confirm - warn user
             show(`✓ Thanh toán vé thành công (ID: ${ticketIds.join(', ')}) nhưng đặt đồ ăn lỗi. Bạn có thể đặt sau.`, "warning");
             setTimeout(()=>location.href="tickets.html", 2000);
             return;
@@ -228,14 +334,14 @@
     async function main(){
       requireAuth();
       await loadNavbar();
-      
+
       const raw = qs("ticketIds") || "";
       ticketIds = raw.split(",").map(x=>Number(x)).filter(Boolean);
       ticketAmount = Number(qs("amount") || "0");
 
-      if(!ticketIds.length){ 
-        show("Thiếu ticketIds."); 
-        return; 
+      if(!ticketIds.length){
+        show("Thiếu ticketIds.");
+        return;
       }
 
       await loadFoodItems();
@@ -249,5 +355,3 @@
   </script>
 </body>
 </html>
-
-

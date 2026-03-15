@@ -24,6 +24,7 @@ export async function loadAdminNavbar() {
             <li class="nav-item"><a class="nav-link" href="rooms.html">Quản lý phòng</a></li>
             <li class="nav-item"><a class="nav-link" href="showtimes.html">Quản lý lịch chiếu</a></li>
             <li class="nav-item"><a class="nav-link" href="tickets.html">Quản lý vé</a></li>
+            <li class="nav-item"><a class="nav-link" href="vouchers.html">Quản lý voucher</a></li>
             <li class="nav-item"><a class="nav-link" href="users.html">Quản lý người dùng</a></li>
           </ul>
           <a class="btn btn-outline-light btn-sm" href="../index.html">Về site</a>

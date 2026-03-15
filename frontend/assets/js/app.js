@@ -41,6 +41,7 @@ export function setupNavbar() {
   const adminLink = role === "ADMIN" ? `<a class="btn btn-outline-light btn-sm me-2" href="admin/dashboard.html">Admin</a>` : "";
   el.innerHTML = `
     ${adminLink}
+    <a class="btn btn-outline-light btn-sm me-2" href="profile.html"><i class="fas fa-user-circle me-1"></i>Hồ sơ</a>
     <a class="btn btn-outline-light btn-sm me-2" href="tickets.html">Vé của tôi</a>
     <span class="text-muted small me-2">Xin chào, <b>${fullName}</b></span>
     <button class="btn btn-sm btn-outline-danger" id="btnLogout">Đăng xuất</button>
