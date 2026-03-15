@@ -487,3 +487,43 @@ export function showGenerateSeatsModal(roomId, onSubmit) {
     console.error("Error in showGenerateSeatsModal:", e);
   }
 }
+
+export function showGenreModal(defaults, onSubmit) {
+  const modalId = "genreModal";
+  const html = `
+    <div class="modal fade" id="${modalId}" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">${defaults?.id ? 'Sửa thể loại' : 'Thêm thể loại'}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form class="admin-form" id="genreForm">
+              <div class="mb-3">
+                <label class="form-label">Tên thể loại</label>
+                <input type="text" class="form-control" name="name" value="${defaults?.name ?? ''}" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea class="form-control" name="description" rows="2">${defaults?.description ?? ''}</textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-check-label">
+                  <input type="checkbox" class="form-check-input" name="isActive" ${defaults?.isActive !== false ? 'checked' : ''}>
+                  Kích hoạt
+                </label>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-admin btn-outline-light" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-admin btn-admin-primary" id="submitBtn">Lưu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  showModalWithForm(html, modalId, "genreForm", "submitBtn", onSubmit);
+}
