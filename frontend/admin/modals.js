@@ -382,15 +382,20 @@ function showModalWithForm(html, modalId, formId, submitBtnId, onSubmit) {
 
         const formData = new FormData(form);
         const data = Object.fromEntries(formData);
-        
+
         // Handle checkbox for active field - convert "on" to true/false
         if (formId.includes("movie")) {
           data.active = formData.has("active") ? true : false;
         }
-        
+
         // Handle checkbox for room if needed
         if (formId.includes("room")) {
           data.active = formData.has("active") ? true : false;
+        }
+
+        // Handle checkbox for genre (isActive field)
+        if (formId.includes("genre")) {
+          data.isActive = formData.has("isActive") ? true : false;
         }
 
         console.log("Form data:", data);
