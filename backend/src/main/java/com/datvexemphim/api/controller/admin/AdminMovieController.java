@@ -1,5 +1,6 @@
 package com.datvexemphim.api.controller.admin;
 
+import com.datvexemphim.api.dto.admin.AdminMovieDto;
 import com.datvexemphim.api.dto.admin.MovieGenreDTO;
 import com.datvexemphim.api.dto.admin.MovieGenreUpsertRequest;
 import com.datvexemphim.api.dto.admin.MovieUpsertRequest;
@@ -24,7 +25,7 @@ public class AdminMovieController {
     }
 
     @GetMapping
-    public List<Movie> list() {
+    public List<AdminMovieDto> list() {
         return adminMovieService.list();
     }
 
