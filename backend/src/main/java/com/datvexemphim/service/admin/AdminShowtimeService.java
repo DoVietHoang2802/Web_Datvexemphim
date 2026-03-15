@@ -36,8 +36,8 @@ public class AdminShowtimeService {
 
     @Transactional
     public List<AdminShowtimeDto> list() {
+        // Hiển thị tất cả suất chiếu (ACTIVE và ENDED)
         return showtimeRepository.findAll().stream()
-                .filter(s -> s.getStatus().name().equals("ACTIVE"))
                 .map(s -> new AdminShowtimeDto(
                         s.getId(),
                         s.getMovie().getId(),
@@ -59,6 +59,7 @@ public class AdminShowtimeService {
 
     public Showtime create(ShowtimeUpsertRequest req) {
         Showtime st = new Showtime();
+        st.setStatus(ShowtimeStatus.ACTIVE); // Mặc định là ACTIVE
         apply(st, req);
         return showtimeRepository.save(st);
     }
