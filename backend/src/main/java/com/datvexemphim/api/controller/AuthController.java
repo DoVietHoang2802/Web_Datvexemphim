@@ -1,6 +1,7 @@
 package com.datvexemphim.api.controller;
 
 import com.datvexemphim.api.dto.auth.AuthResponse;
+import com.datvexemphim.api.dto.auth.GoogleLoginRequest;
 import com.datvexemphim.api.dto.auth.LoginRequest;
 import com.datvexemphim.api.dto.auth.RegisterRequest;
 import com.datvexemphim.service.AuthService;
@@ -25,6 +26,11 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest req) {
         return authService.login(req);
+    }
+
+    @PostMapping("/google-login")
+    public AuthResponse googleLogin(@RequestBody GoogleLoginRequest req) {
+        return authService.googleLogin(req);
     }
 }
 

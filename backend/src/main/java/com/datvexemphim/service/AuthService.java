@@ -1,6 +1,7 @@
 package com.datvexemphim.service;
 
 import com.datvexemphim.api.dto.auth.AuthResponse;
+import com.datvexemphim.api.dto.auth.GoogleLoginRequest;
 import com.datvexemphim.api.dto.auth.LoginRequest;
 import com.datvexemphim.api.dto.auth.RegisterRequest;
 import com.datvexemphim.domain.entity.User;
@@ -56,6 +57,25 @@ public class AuthService {
         );
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         User user = principal.getUser();
+        String token = jwtService.generateAccessToken(user.getEmail(), Map.of("role", user.getRole().name()));
+        return AuthResponse.bearer(token, user.getId(), user.getFullName(), user.getEmail(), user.getRole().name());
+    }
+
+    public AuthResponse googleLogin(GoogleLoginRequest req) {
+        String email = req.getEmail().toLowerCase();
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null) {
+            // Tạo user mới từ Google
+            user = new User();
+            user.setFullName(req.getDisplayName() != null ? req.getDisplayName() : "Google User");
+            user.setEmail(email);
+            // Đặt mật khẩu ngẫu nhiên (không dùng được vì đăng nhập bằng Google)
+            user.setPasswordHash(passwordEncoder.encode("GOOGLE_" + System.currentTimeMillis()));
+            user.setRole(Role.USER);
+            userRepository.save(user);
+        }
+
         String token = jwtService.generateAccessToken(user.getEmail(), Map.of("role", user.getRole().name()));
         return AuthResponse.bearer(token, user.getId(), user.getFullName(), user.getEmail(), user.getRole().name());
     }

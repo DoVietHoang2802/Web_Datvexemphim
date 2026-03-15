@@ -346,34 +346,55 @@
 
   <!-- Modal Add/Edit Category -->
   <div class="modal fade" id="categoryModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="categoryModalTitle">Thêm Danh mục</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px 16px 0 0; padding: 20px 24px;">
+          <h5 class="modal-title fw-bold" id="categoryModalTitle" style="font-size: 1.3rem;">➕ Thêm Danh mục</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="padding: 24px;">
           <form id="categoryForm">
-            <div class="mb-3">
-              <label for="categoryName" class="form-label">Tên danh mục <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="categoryName" placeholder="VD: Bắp & Snack" required>
+            <div class="mb-4">
+              <label for="categoryName" class="form-label fw-semibold" style="color: #374151; font-size: 0.95rem;">
+                📛 Tên danh mục <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control form-control-lg" id="categoryName"
+                     placeholder="VD: Bắp & Snack, Nước uống, Bánh ngọt..."
+                     required
+                     style="border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px 16px; font-size: 1rem;">
+            </div>
+            <div class="mb-4">
+              <label for="categoryIcon" class="form-label fw-semibold" style="color: #374151; font-size: 0.95rem;">
+                🎨 Biểu tượng FontAwesome <span class="text-danger">*</span>
+              </label>
+              <input type="text" class="form-control form-control-lg" id="categoryIcon"
+                     placeholder="VD: fas fa-popcorn, fas fa-burger, fas fa-bottle-water"
+                     required
+                     style="border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px 16px; font-size: 1rem;">
+              <small class="text-muted mt-1 d-block">Tìm icon tại <a href="https://fontawesome.com/icons" target="_blank" class="text-decoration-none">fontawesome.com</a></small>
             </div>
             <div class="mb-3">
-              <label for="categoryIcon" class="form-label">Biểu tượng FontAwesome <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="categoryIcon" placeholder="VD: fas fa-popcorn" required>
-              <small class="text-muted">Tìm tại <a href="https://fontawesome.com/icons" target="_blank">fontawesome.com</a></small>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Xem trước <span class="text-danger">*</span></label>
-              <div style="text-align: center; padding: 2rem; background: #f8fafc; border-radius: 0.5rem;">
-                <i id="iconPreview" class="fas fa-utensils" style="font-size: 2rem; color: var(--primary);"></i>
+              <label class="form-label fw-semibold" style="color: #374151; font-size: 0.95rem;">
+                👁️ Xem trước biểu tượng
+              </label>
+              <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); border-radius: 12px; border: 2px dashed #9ca3af;">
+                <div id="iconPreview" class="fas fa-utensils d-flex align-items-center justify-content-center"
+                     style="font-size: 3.5rem; color: #667eea; width: 100px; height: 100px; background: white; border-radius: 50%; margin: 0 auto; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); align-items: center;">
+                </div>
+                <p class="mt-2 text-muted fw-medium">Xem trước icon sẽ hiển thị như thế này</p>
               </div>
             </div>
           </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-          <button type="button" class="btn btn-brand" id="btnSaveCategory">Lưu</button>
+        <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e5e7eb;">
+          <button type="button" class="btn btn-lg px-4" data-bs-dismiss="modal"
+                  style="background: #f3f4f6; color: #374151; border-radius: 10px; font-weight: 600;">
+            ❌ Hủy
+          </button>
+          <button type="button" class="btn btn-lg px-4" id="btnSaveCategory"
+                  style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+            💾 Lưu danh mục
+          </button>
         </div>
       </div>
     </div>
@@ -381,39 +402,76 @@
 
   <!-- Modal Add/Edit Item -->
   <div class="modal fade" id="itemModal" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="itemModalTitle">Thêm Sản phẩm</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+        <div class="modal-header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border-radius: 16px 16px 0 0; padding: 20px 24px;">
+          <h5 class="modal-title fw-bold" id="itemModalTitle" style="font-size: 1.3rem;">➕ Thêm Sản phẩm</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="padding: 24px;">
           <form id="itemForm">
-            <div class="mb-3">
-              <label for="itemName" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="itemName" placeholder="VD: Bắp mặn" required>
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <label for="itemName" class="form-label fw-semibold" style="color: #374151; font-size: 0.95rem;">
+                  📛 Tên sản phẩm <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control form-control-lg" id="itemName"
+                       placeholder="VD: Bắp rang bơ, Coca Cola..."
+                       required
+                       style="border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px 16px; font-size: 1rem;">
+              </div>
+              <div class="col-md-6 mb-4">
+                <label for="itemCategory" class="form-label fw-semibold" style="color: #374151; font-size: 0.95rem;">
+                  📂 Danh mục <span class="text-danger">*</span>
+                </label>
+                <select class="form-select form-select-lg" id="itemCategory" required
+                        style="border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px 16px; font-size: 1rem;">
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <label for="itemPrice" class="form-label fw-semibold" style="color: #374151; font-size: 0.95rem;">
+                  💰 Giá (VNĐ) <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text" style="border: 2px solid #e5e7eb; border-radius: 10px 0 0 10px; background: #f9fafb; font-weight: 600; color: #374151;">₫</span>
+                  <input type="number" class="form-control form-control-lg" id="itemPrice"
+                         placeholder="0" min="0" required
+                         style="border: 2px solid #e5e7eb; border-radius: 0 10px 10px 0; padding: 12px 16px; font-size: 1rem;">
+                </div>
+              </div>
+              <div class="col-md-6 mb-4">
+                <label for="itemSize" class="form-label fw-semibold" style="color: #374151; font-size: 0.95rem;">
+                  📏 Kích thước
+                </label>
+                <input type="text" class="form-control form-control-lg" id="itemSize"
+                       placeholder="VD: Vừa, Lớn, Nhỏ"
+                       style="border: 2px solid #e5e7eb; border-radius: 10px; padding: 12px 16px; font-size: 1rem;">
+              </div>
             </div>
             <div class="mb-3">
-              <label for="itemCategory" class="form-label">Danh mục <span class="text-danger">*</span></label>
-              <select class="form-select" id="itemCategory" required></select>
-            </div>
-            <div class="mb-3">
-              <label for="itemPrice" class="form-label">Giá (VNĐ) <span class="text-danger">*</span></label>
-              <input type="number" class="form-control" id="itemPrice" placeholder="0" min="0" required>
-            </div>
-            <div class="mb-3">
-              <label for="itemSize" class="form-label">Kích thước</label>
-              <input type="text" class="form-control" id="itemSize" placeholder="VD: Vừa">
-            </div>
-            <div class="mb-3">
-              <label for="itemStock" class="form-label">Số lượng tồn kho</label>
-              <input type="number" class="form-control" id="itemStock" placeholder="0" min="0" value="100">
+              <label for="itemStock" class="form-label fw-semibold" style="color: #374151; font-size: 0.95rem;">
+                📦 Số lượng tồn kho
+              </label>
+              <div class="input-group">
+                <span class="input-group-text" style="border: 2px solid #e5e7eb; border-radius: 10px 0 0 10px; background: #f9fafb; font-weight: 600; color: #374151;">📦</span>
+                <input type="number" class="form-control form-control-lg" id="itemStock"
+                       placeholder="100" min="0" value="100"
+                       style="border: 2px solid #e5e7eb; border-radius: 0 10px 10px 0; padding: 12px 16px; font-size: 1rem;">
+              </div>
             </div>
           </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-          <button type="button" class="btn btn-brand" id="btnSaveItem">Lưu</button>
+        <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #e5e7eb;">
+          <button type="button" class="btn btn-lg px-4" data-bs-dismiss="modal"
+                  style="background: #f3f4f6; color: #374151; border-radius: 10px; font-weight: 600;">
+            ❌ Hủy
+          </button>
+          <button type="button" class="btn btn-lg px-4" id="btnSaveItem"
+                  style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; border-radius: 10px; font-weight: 600; box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);">
+            💾 Lưu sản phẩm
+          </button>
         </div>
       </div>
     </div>
