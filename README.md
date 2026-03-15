@@ -88,9 +88,12 @@ python -m http.server 5500
 ```
 
 chay du an
+mo laragon 
 .\mvnw spring-boot:run
  lenh dong tat ca cong 
  taskkill /F /IM java.exe
+ chaynrok
+ huong dan nam trong file config.js nằm trong frontend /assets/js/configs
 Sau đó mở:
 
 - `http://localhost:5500/index.html`

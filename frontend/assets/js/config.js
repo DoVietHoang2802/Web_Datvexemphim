@@ -1,12 +1,12 @@
 /**
- * ⚠️ CẬP NHẬT  LINK NGROK  VÀ VERCEL TẠI ĐÂY NỦA LẦN THAY ĐỔI
+ * ⚠️ CẬP NHẬT  LINK BACKEND TẠI ĐÂY
  */
 
 const CONFIG = {
-  // ========== NGROK URLs (UPDATE HERE) ==========
+  // ========== PRODUCTION (Vercel + Railway) ==========
   FRONTEND_URL: "https://web-datvexemphim.vercel.app",  // vercel (Frontend)
-  API_BASE: "https://poly-gemmological-agnes.ngrok-free.dev/api",  // ngrok http 9090 (Backend) "https://abc1-ngrok.ngrok.io/api"
-  
+  API_BASE: "https://webdatvexemphim-production.up.railway.app/api",  // Railway Backend
+
   // ========== DEV Mode (Local) ==========
   // Uncomment để dùng local:
   // FRONTEND_URL: "http://localhost:5500",
