@@ -2,7 +2,9 @@ package com.datvexemphim.api.controller;
 
 import com.datvexemphim.api.dto.publicapi.MovieDetailDto;
 import com.datvexemphim.api.dto.publicapi.MovieSummaryDto;
+import com.datvexemphim.api.dto.admin.MovieGenreDTO;
 import com.datvexemphim.service.MovieService;
+import com.datvexemphim.service.admin.MovieGenreService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +14,11 @@ import java.util.List;
 @CrossOrigin
 public class MovieController {
     private final MovieService movieService;
+    private final MovieGenreService movieGenreService;
 
-    public MovieController(MovieService movieService) {
+    public MovieController(MovieService movieService, MovieGenreService movieGenreService) {
         this.movieService = movieService;
+        this.movieGenreService = movieGenreService;
     }
 
     @GetMapping
@@ -25,6 +29,12 @@ public class MovieController {
     @GetMapping("/{id}")
     public MovieDetailDto detail(@PathVariable Long id) {
         return movieService.getDetail(id);
+    }
+
+    // Public endpoint to get genres (no auth required)
+    @GetMapping("/genres")
+    public List<MovieGenreDTO> listGenres() {
+        return movieGenreService.listActive();
     }
 }
 

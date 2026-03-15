@@ -11,16 +11,11 @@ const MODALS_API_BASE = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE)
 export async function showMovieModal(defaults, onSubmit) {
   const modalId = "movieModal";
 
-  // Lấy danh sách genres từ API
+  // Lấy danh sách genres từ API (dùng endpoint công khai)
   let genresOptions = '<option value="">-- Chọn thể loại --</option>';
   try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("No token");
-    }
-    const response = await fetch(`${MODALS_API_BASE}/admin/movies/genres`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    // Dùng endpoint công khai, không cần token
+    const response = await fetch(`${MODALS_API_BASE}/movies/genres`);
     if (response.ok) {
       const genres = await response.json();
       genresOptions += genres.map(g =>
