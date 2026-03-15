@@ -3,6 +3,11 @@
  * Provides reusable modal functions for admin pages
  */
 
+// Get API_BASE from config
+const MODALS_API_BASE = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE)
+  ? CONFIG.API_BASE
+  : "http://localhost:9090/api";
+
 export async function showMovieModal(defaults, onSubmit) {
   const modalId = "movieModal";
 
@@ -10,7 +15,7 @@ export async function showMovieModal(defaults, onSubmit) {
   let genresOptions = '<option value="">-- Chọn thể loại --</option>';
   try {
     const token = localStorage.getItem("token");
-    const response = await fetch(`${window.API_BASE}/admin/movies/genres`, {
+    const response = await fetch(`${MODALS_API_BASE}/admin/movies/genres`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (response.ok) {
