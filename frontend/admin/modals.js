@@ -15,6 +15,9 @@ export async function showMovieModal(defaults, onSubmit) {
   let genresOptions = '<option value="">-- Chọn thể loại --</option>';
   try {
     const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token");
+    }
     const response = await fetch(`${MODALS_API_BASE}/admin/movies/genres`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
