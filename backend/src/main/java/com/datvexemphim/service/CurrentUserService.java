@@ -28,5 +28,9 @@ public class CurrentUserService {
     public User getCurrentUser() {
         return requireUser();
     }
+
+    public Long getCurrentUserId() {
+        return requireUser().getId();
+    }
 }
 
