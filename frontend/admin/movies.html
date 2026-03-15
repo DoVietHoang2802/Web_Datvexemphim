@@ -23,6 +23,7 @@
             <tr>
               <th>ID</th>
               <th>Tên</th>
+              <th>Thể loại</th>
               <th>Thời lượng</th>
               <th>Kích hoạt</th>
               <th class="text-end">Tác vụ</th>
@@ -51,6 +52,7 @@
         <tr>
           <td>${m.id}</td>
           <td><strong>${m.title}</strong></td>
+          <td><span class="badge bg-info">${m.genre || '-'}</span></td>
           <td><span class="admin-badge admin-badge-warning">${m.durationMinutes}m</span></td>
           <td><span class="admin-badge ${m.active ? 'admin-badge-success' : 'admin-badge-danger'}">${m.active ? "Có" : "Không"}</span></td>
           <td class="text-end">

@@ -7,7 +7,8 @@ public record MovieDetailDto(
         Integer durationMinutes,
         String posterUrl,
         String trailerUrl,
-        String rating
+        String rating,
+        String genre
 ) {
 }
 

@@ -49,6 +49,7 @@ public class AdminMovieService {
         m.setPosterUrl(req.posterUrl());
         m.setTrailerUrl(req.trailerUrl());
         m.setRating(req.rating());
+        m.setGenre(req.genre());
         m.setActive(Boolean.TRUE.equals(req.active()));
     }
 }

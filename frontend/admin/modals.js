@@ -40,6 +40,21 @@ export function showMovieModal(defaults, onSubmit) {
                 <input type="text" class="form-control" name="rating" value="${defaults?.rating ?? ''}" placeholder="PG-13, R, etc.">
               </div>
               <div class="mb-3">
+                <label class="form-label">Thể loại</label>
+                <select class="form-select" name="genre">
+                  <option value="">-- Chọn thể loại --</option>
+                  <option value="Hành động" ${defaults?.genre === 'Hành động' ? 'selected' : ''}>Hành động</option>
+                  <option value="Tình cảm" ${defaults?.genre === 'Tình cảm' ? 'selected' : ''}>Tình cảm</option>
+                  <option value="Hài hước" ${defaults?.genre === 'Hài hước' ? 'selected' : ''}>Hài hước</option>
+                  <option value="Kinh dị" ${defaults?.genre === 'Kinh dị' ? 'selected' : ''}>Kinh dị</option>
+                  <option value="Khoa học viễn tưởng" ${defaults?.genre === 'Khoa học viễn tưởng' ? 'selected' : ''}>Khoa học viễn tưởng</option>
+                  <option value="Phiêu lưu" ${defaults?.genre === 'Phiêu lưu' ? 'selected' : ''}>Phiêu lưu</option>
+                  <option value="Hoạt hình" ${defaults?.genre === 'Hoạt hình' ? 'selected' : ''}>Hoạt hình</option>
+                  <option value="Tài liệu" ${defaults?.genre === 'Tài liệu' ? 'selected' : ''}>Tài liệu</option>
+                  <option value="Khác" ${defaults?.genre === 'Khác' ? 'selected' : ''}>Khác</option>
+                </select>
+              </div>
+              <div class="mb-3">
                 <label class="form-check-label">
                   <input type="checkbox" class="form-check-input" name="active" ${defaults?.active ? 'checked' : ''}>
                   Kích hoạt

@@ -10,6 +10,7 @@ public record MovieUpsertRequest(
         String posterUrl,
         String trailerUrl,
         String rating,
+        String genre,
         @NotNull Boolean active
 ) {
 }

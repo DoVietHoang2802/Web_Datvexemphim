@@ -23,6 +23,8 @@ public class Movie {
 
     private String rating;
 
+    private String genre;
+
     @Column(nullable = false)
     private boolean active = true;
 
@@ -40,6 +42,8 @@ public class Movie {
     public void setTrailerUrl(String trailerUrl) { this.trailerUrl = trailerUrl; }
     public String getRating() { return rating; }
     public void setRating(String rating) { this.rating = rating; }
+    public String getGenre() { return genre; }
+    public void setGenre(String genre) { this.genre = genre; }
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
 }
