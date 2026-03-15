@@ -38,7 +38,7 @@ public class SecurityConfig {
                 "http://localhost:5500",
                 "http://127.0.0.1:5500",
                 "https://web-datvexemphim.vercel.app",
-                "https://*.ngrok-free.dev"
+                "https://datvexemphim-backend.onrender.com"
         ));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfig.setAllowedHeaders(Arrays.asList("*"));
