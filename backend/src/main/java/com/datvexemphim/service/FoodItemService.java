@@ -103,7 +103,7 @@ public class FoodItemService {
      * Create new food item (Admin) - params (legacy)
      */
     public FoodItemDTO create(Long categoryId, String name, String description, BigDecimal price,
-                              String imageUrl, Integer stock) {
+                              String size, String imageUrl, Integer stock) {
         FoodCategory category = foodCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Danh mục đồ ăn không tìm thấy"
@@ -151,7 +151,7 @@ public class FoodItemService {
      * Update food item (Admin) - params (legacy)
      */
     public FoodItemDTO update(Long id, String name, String description, BigDecimal price,
-                              String imageUrl, Integer stock, Boolean isAvailable, Integer displayOrder) {
+                              String size, String imageUrl, Integer stock, Boolean isAvailable, Integer displayOrder) {
         FoodItem item = foodItemRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Sản phẩm đồ ăn không tìm thấy"
