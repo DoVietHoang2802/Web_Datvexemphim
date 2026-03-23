@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Vé của tôi</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    .page-header {
+      background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .filter-tabs .btn {
+      border-radius: 20px;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+    .filter-tabs .btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .ticket-card {
+      background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      margin-bottom: 1rem;
+    }
+    .ticket-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      border-color: rgba(102, 126, 234, 0.3);
+    }
+    .ticket-card.status-confirmed {
+      border-left: 4px solid #10b981;
+    }
+    .ticket-card.status-pending {
+      border-left: 4px solid #f59e0b;
+    }
+    .ticket-card.status-cancelled {
+      border-left: 4px solid #ef4444;
+      opacity: 0.7;
+    }
+    .ticket-header {
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .ticket-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .ticket-movie {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+    .ticket-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    .ticket-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .ticket-meta-item i {
+      width: 16px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.4);
+    }
+    .ticket-price {
+      text-align: right;
+    }
+    .ticket-total {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #10b981;
+    }
+    .ticket-seat-badge {
+      background: rgba(102, 126, 234, 0.2);
+      color: #a5b4fc;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .status-badge {
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-badge.confirmed {
+      background: rgba(16, 185, 129, 0.2);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-badge.pending {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .status-badge.cancelled {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .ticket-details {
+      padding: 0 1.25rem 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: none;
+    }
+    .ticket-details.open {
+      display: block;
+      padding-top: 1rem;
+    }
+    .ticket-details-toggle {
+      float: right;
+      color: rgba(255, 255, 255, 0.4);
+      transition: transform 0.3s;
+      font-size: 0.8rem;
+      padding: 0.5rem;
+      cursor: pointer;
+    }
+    .ticket-details-toggle.open {
+      transform: rotate(180deg);
+    }
+    .food-order-section {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    .food-order-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #f59e0b;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    .food-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.4rem 0;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+      font-size: 0.9rem;
+    }
+    .food-item:last-child {
+      border-bottom: none;
+    }
+    .ticket-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+    .empty-state h5 {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 0.5rem;
+    }
+    .loading-skeleton {
+      background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .skeleton-line {
+      height: 14px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+    .skeleton-line.short { width: 40%; }
+    .skeleton-line.medium { width: 70%; }
+  </style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main class="container py-4">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+          <h3 class="mb-1 text-white">
+            <i class="fas fa-ticket-alt me-2" style="color: #667eea;"></i>
+            Vé của tôi
+          </h3>
+          <p class="text-muted mb-0 small">Xem và quản lý vé đã đặt</p>
+        </div>
+        <a class="btn btn-brand btn-sm" href="showtimes.html">
+          <i class="fas fa-plus me-1"></i> Đặt thêm vé
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs mb-3">
+      <button class="btn btn-outline-light active" data-filter="all">
+        <i class="fas fa-list me-1"></i> Tất cả
+      </button>
+      <button class="btn btn-outline-light" data-filter="CONFIRMED">
+        <i class="fas fa-check-circle me-1"></i> Đã đặt
+      </button>
+      <button class="btn btn-outline-light" data-filter="PENDING">
+        <i class="fas fa-clock me-1"></i> Chờ thanh toán
+      </button>
+      <button class="btn btn-outline-light" data-filter="CANCELLED">
+        <i class="fas fa-times-circle me-1"></i> Đã hủy
+      </button>
+    </div>
+
+    <div id="msg"></div>
+    <div id="ticketsList">
+      <!-- Loading Skeleton -->
+      <div class="loading-skeleton">
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line short"></div>
+      </div>
+      <div class="loading-skeleton">
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line medium"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script type="module">
+    import { apiGet, apiPost, apiDelete } from "./assets/js/api.js";
+    import { formatTime, formatDate, formatVnd, setupNavbar, requireAuth, showToast } from "./assets/js/app.js";
+
+    let allTickets = [];
+    let currentFilter = 'all';
+
+    async function loadNavbar(){
+      const html = await fetch("./partials/navbar.html").then(r=>r.text());
+      document.querySelector("#navbar").innerHTML = html;
+      setupNavbar();
+    }
+
+    function hasFood(t) {
+      return t.foodOrderId && t.foodItems && t.foodItems.length > 0;
+    }
+
+    function formatFoodVnd(amount) {
+      if (!amount) return '0 ₫';
+      return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
+    }
+
+    function getStatusClass(status) {
+      switch(status) {
+        case 'CONFIRMED': return 'status-confirmed';
+        case 'PENDING': return 'status-pending';
+        case 'CANCELLED': return 'status-cancelled';
+        default: return '';
+      }
+    }
+
+    function getStatusBadge(status) {
+      switch(status) {
+        case 'CONFIRMED': return '<span class="status-badge confirmed"><i class="fas fa-check me-1"></i>Đã đặt</span>';
+        case 'PENDING': return '<span class="status-badge pending"><i class="fas fa-clock me-1"></i>Chờ TT</span>';
+        case 'CANCELLED': return '<span class="status-badge cancelled"><i class="fas fa-ban me-1"></i>Đã hủy</span>';
+        default: return '';
+      }
+    }
+
+    function ticketCard(t) {
+      const statusClass = getStatusClass(t.status);
+      const statusBadge = getStatusBadge(t.status);
+      const canCancel = t.status === 'CONFIRMED';
+      const canTransfer = t.status === 'CONFIRMED';
+      const canDelete = t.status === 'CANCELLED';
+      const canPay = t.status === 'PENDING';
+      const totalPrice = (t.price || 0) + (t.foodTotalPrice || 0);
+
+      const foodHtml = hasFood(t) ? `
+        <div class="food-order-section">
+          <div class="food-order-title">
+            <i class="fas fa-utensils"></i>
+            Đồ ăn & nước uống
+          </div>
+          ${t.foodItems.map(item => `
+            <div class="food-item">
+              <span>${item.name} <span class="text-muted">×${item.quantity}</span></span>
+              <span>${formatFoodVnd(item.subtotal)}</span>
+            </div>
+          `).join('')}
+          <div class="d-flex justify-content-between mt-2 pt-2 border-top">
+            <span class="fw-bold">Tổng đồ ăn:</span>
+            <span class="fw-bold text-warning">${formatFoodVnd(t.foodTotalPrice)}</span>
+          </div>
+        </div>
+      ` : '';
+
+      return `
+        <div class="ticket-card ${statusClass}" data-ticket-id="${t.ticketId}">
+          <div class="ticket-header" onclick="toggleDetails(this)">
+            <div style="flex: 1;">
+              <div class="ticket-movie">${t.movieTitle}</div>
+              <div class="ticket-meta">
+                <div class="ticket-meta-item">
+                  <i class="fas fa-clock"></i>
+                  ${formatDate(t.startTime)} · ${formatTime(t.startTime)}
+                </div>
+                <div class="ticket-meta-item">
+                  <i class="fas fa-door-open"></i>
+                  ${t.roomName}
+                </div>
+                <div class="ticket-meta-item">
+                  <i class="fas fa-couch"></i>
+                  <span class="ticket-seat-badge">${t.seatCode}</span>
+                </div>
+              </div>
+            </div>
+            <div class="text-end">
+              <div class="mb-2">${statusBadge}</div>
+              <div class="ticket-total">${formatVnd(totalPrice)}</div>
+              <div class="ticket-details-toggle"><i class="fas fa-chevron-down"></i></div>
+            </div>
+          </div>
+          <div class="ticket-details">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="small text-muted mb-1">Thông tin vé</div>
+                <div class="small">
+                  <div><i class="fas fa-hashtag me-2 text-muted"></i>ID: ${t.ticketId}</div>
+                  <div><i class="fas fa-barcode me-2 text-muted"></i>Mã booking: ${t.bookingCode || '—'}</div>
+                  <div><i class="fas fa-ticket me-2 text-muted"></i>Giá vé: ${formatVnd(t.price)}</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                ${foodHtml ? `<div class="small text-muted mb-1">Chi tiết đồ ăn đã chọn xem bên dưới</div>` : `
+                <div class="small text-muted"><i class="fas fa-utensils me-2"></i>Không có đồ ăn kèm</div>
+                `}
+              </div>
+            </div>
+            ${foodHtml}
+            <div class="ticket-actions mt-3 pt-3 border-top">
+              ${canPay ? `
+                <a class="btn btn-sm btn-success" href="checkout.html?ticketIds=${t.ticketId}">
+                  <i class="fas fa-credit-card me-1"></i> Thanh toán
+                </a>
+                <button class="btn btn-sm btn-outline-danger" data-action="cancel" data-id="${t.ticketId}">
+                  <i class="fas fa-times me-1"></i> Hủy vé
+                </button>
+              ` : ''}
+              ${canTransfer ? `
+                <button class="btn btn-sm btn-outline-light" data-action="transfer" data-id="${t.ticketId}">
+                  <i class="fas fa-share-alt me-1"></i> Chuyển vé
+                </button>
+              ` : ''}
+              ${canCancel && !canPay ? `
+                <button class="btn btn-sm btn-outline-danger" data-action="cancel" data-id="${t.ticketId}">
+                  <i class="fas fa-times me-1"></i> Hủy vé
+                </button>
+              ` : ''}
+              ${canDelete ? `
+                <button class="btn btn-sm btn-danger" data-action="delete" data-id="${t.ticketId}">
+                  <i class="fas fa-trash me-1"></i> Xóa vé
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    window.toggleDetails = function(header) {
+      const details = header.nextElementSibling;
+      const toggle = header.querySelector('.ticket-details-toggle');
+      details.classList.toggle('open');
+      toggle.classList.toggle('open');
+    };
+
+    function renderTickets(tickets) {
+      const container = document.querySelector("#ticketsList");
+
+      if (!tickets || tickets.length === 0) {
+        let emptyMsg = 'Chưa có vé nào.';
+        if (currentFilter === 'CONFIRMED') emptyMsg = 'Chưa có vé nào được đặt.';
+        else if (currentFilter === 'PENDING') emptyMsg = 'Không có vé chờ thanh toán.';
+        else if (currentFilter === 'CANCELLED') emptyMsg = 'Không có vé nào bị hủy.';
+
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-ticket-alt"></i>
+            <h5>${emptyMsg}</h5>
+            <p class="small">Đặt vé để xem phim tại rạp</p>
+            <a class="btn btn-brand mt-3" href="showtimes.html">
+              <i class="fas fa-film me-2"></i>Đặt vé ngay
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = tickets.map(ticketCard).join('');
+    }
+
+    function filterTickets(filter) {
+      currentFilter = filter;
+      if (filter === 'all') {
+        renderTickets(allTickets);
+      } else {
+        const filtered = allTickets.filter(t => t.status === filter);
+        renderTickets(filtered);
+      }
+    }
+
+    async function refresh(){
+      try {
+        allTickets = await apiGet("/tickets/me");
+        filterTickets(currentFilter);
+      } catch(e) {
+        showToast('Không thể tải danh sách vé: ' + e.message, 'error');
+      }
+    }
+
+    async function handleAction(action, id) {
+      try {
+        if (action === 'cancel') {
+          if (!confirm('Bạn có chắc muốn hủy vé này?\n\nGhế sẽ được giải phóng và bạn có thể đặt lại.')) return;
+          await apiPost(`/tickets/${id}/cancel`, {});
+          showToast('Hủy vé thành công! Ghế đã được giải phóng.', 'success');
+          await refresh();
+        }
+        if (action === 'transfer') {
+          const toEmail = prompt('Nhập email người nhận vé:');
+          if (!toEmail) return;
+          await apiPost(`/tickets/transfer`, { ticketId: id, toEmail });
+          showToast('Chuyển vé thành công.', 'success');
+          await refresh();
+        }
+        if (action === 'delete') {
+          if (!confirm('Bạn có chắc muốn xóa vé đã hủy?\n\nHành động này không thể hoàn tác.')) return;
+          await apiDelete(`/tickets/${id}`);
+          showToast('Xóa vé thành công.', 'success');
+          await refresh();
+        }
+      } catch(err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function main(){
+      requireAuth();
+      await loadNavbar();
+      await refresh();
+
+      // Filter tab clicks
+      document.querySelectorAll('.filter-tabs .btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-tabs .btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          filterTickets(btn.dataset.filter);
+        });
+      });
+
+      // Action button clicks
+      document.querySelector("#ticketsList").addEventListener("click", async (e) => {
+        const btn = e.target.closest("button[data-action]");
+        if (!btn) return;
+        e.stopPropagation();
+        const action = btn.dataset.action;
+        const id = Number(btn.dataset.id);
+        await handleAction(action, id);
+      });
+    }
+    main().catch(e => showToast(e.message, 'error'));
+  </script>
+</body>
+</html>

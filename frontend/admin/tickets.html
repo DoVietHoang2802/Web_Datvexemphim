@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin - Tickets</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h4 class="mb-0">Quản lý vé</h4>
+      <button class="btn btn-admin btn-outline-light btn-sm" id="btnRefresh">🔄 Làm mới</button>
+    </div>
+    <div id="msg"></div>
+    <div class="card p-3">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Phim</th>
+              <th>Bắt đầu</th>
+              <th>Ghế</th>
+              <th>Đần đặt</th>
+              <th>Trạng thái</th>
+              <th>Đặt vé</th>
+              <th class="text-end">Tác vụ</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script type="module">
+    import { apiGet, apiPost, apiDelete } from "../assets/js/api.js";
+    import { requireAdmin, loadAdminNavbar } from "./admin.js";
+    import { formatTime } from "../assets/js/app.js";
+    import { showConfirmModal } from "./modals.js";
+
+    function show(msg, type="danger"){
+      document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
+    }
+
+    function badge(st){
+      if(st==="CONFIRMED") return `<span class="admin-badge admin-badge-success">CONFIRMED</span>`;
+      if(st==="PENDING") return `<span class="admin-badge admin-badge-warning">PENDING</span>`;
+      if(st==="CANCELLED") return `<span class="admin-badge admin-badge-danger">CANCELLED</span>`;
+      return `<span class="admin-badge">${st}</span>`;
+    }
+
+    function row(t){
+      return `
+        <tr>
+          <td><strong>${t.ticketId}</strong></td>
+          <td>${t.movieTitle}</td>
+          <td class="small">${formatTime(t.startTime)}</td>
+          <td class="fw-semibold">${t.seatCode}</td>
+          <td class="small">${t.ownerEmail}</td>
+          <td>${badge(t.status)}</td>
+          <td class="small text-muted">${t.bookingCode || "—"}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-admin btn-outline-warning me-1" data-action="cancel" data-id="${t.ticketId}">⛔ Hủy</button>
+            <button class="btn btn-sm btn-admin btn-outline-danger" data-action="del" data-id="${t.ticketId}">🗑️ Xóa</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    async function refresh(){
+      const list = await apiGet("/admin/tickets");
+      document.querySelector("#tbody").innerHTML = list.map(row).join("") || `<tr><td colspan="8" class="text-muted">Không có dữ liệu</td></tr>`;
+    }
+
+    async function main(){
+      requireAdmin();
+      await loadAdminNavbar();
+      await refresh();
+
+      document.querySelector("#btnRefresh").addEventListener("click", ()=>refresh().catch(e=>show(e.message)));
+
+      document.querySelector("#tbody").addEventListener("click", async (e)=>{
+        const btn = e.target.closest("button[data-action]");
+        if(!btn) return;
+        const id = Number(btn.dataset.id);
+        const action = btn.dataset.action;
+
+        if(action==="cancel"){
+          showConfirmModal("Hủy vé?", "Vé sẽ được đánh dấu là CANCELLED.", async () => {
+            try{
+              await apiPost(`/admin/tickets/${id}/cancel`);
+              show("✅ Đã hủy vé.", "success");
+              await refresh();
+            }catch(err){ show("❌ Lỗi hủy vé: " + (err.message || err)); }
+          }, "Hủy vé", "btn-admin-warning");
+        }
+
+        if(action==="del"){
+          showConfirmModal("Xóa vé?", "Hành động này không thể hoàn tác.", async () => {
+            try{
+              await apiDelete(`/admin/tickets/${id}`);
+              show("✅ Đã xóa.", "success");
+              await refresh();
+            }catch(err){ show("❌ Lỗi xóa: " + (err.message || err)); }
+          }, "Xóa", "btn-admin-danger");
+        }
+      });
+    }
+    main().catch(e=>show(e.message));
+  </script>
+
+
+</body>
+</html>
+

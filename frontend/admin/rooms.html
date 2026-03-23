@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Admin - Rooms</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../assets/css/style.css" rel="stylesheet">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h4 class="mb-0">Quản lý phòng</h4>
+      <button class="btn btn-brand btn-sm" id="btnAdd">Thêm phòng</button>
+    </div>
+    <div id="msg"></div>
+    <div class="card p-3">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tên</th>
+              <th>Hàng</th>
+              <th>Cột</th>
+              <th class="text-end">Tác vụ</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script type="module">
+    import { apiGet, apiPost, apiPut, apiDelete } from "../assets/js/api.js";
+    import { requireAdmin, loadAdminNavbar } from "./admin.js";
+    import { showRoomModal, showGenerateSeatsModal, showConfirmModal } from "./modals.js";
+
+    function show(msg, type="danger"){
+      document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
+    }
+
+    function row(r){
+      return `
+        <tr>
+          <td>${r.id}</td>
+          <td><strong>${r.name}</strong></td>
+          <td><span class="admin-badge admin-badge-warning">${r.totalRows}</span></td>
+          <td><span class="admin-badge admin-badge-warning">${r.totalCols}</span></td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-admin btn-outline-light me-1" data-action="edit" data-id="${r.id}">✏️ Sửa</button>
+            <button class="btn btn-sm btn-admin btn-outline-success me-1" data-action="seats" data-id="${r.id}">🪑 Tạo ghế</button>
+            <button class="btn btn-sm btn-admin btn-outline-danger" data-action="del" data-id="${r.id}">🗑️ Xóa</button>
+          </td>
+        </tr>
+      `;
+    }
+
+    async function refresh(){
+      const list = await apiGet("/admin/rooms");
+      document.querySelector("#tbody").innerHTML = list.map(row).join("") || `<tr><td colspan="5" class="text-muted">Không có dữ liệu</td></tr>`;
+    }
+
+    async function main(){
+      requireAdmin();
+      await loadAdminNavbar();
+      await refresh();
+
+      document.querySelector("#btnAdd").addEventListener("click", ()=>{
+        showRoomModal(null, async (data) => {
+          try{
+            await apiPost("/admin/rooms", data);
+            show("✅ Đã thêm phòng.", "success");
+            await refresh();
+          }catch(e){ show("❌ Lỗi thêm: " + (e.message || e)); }
+        });
+      });
+
+      document.querySelector("#tbody").addEventListener("click", async (e)=>{
+        const btn = e.target.closest("button[data-action]");
+        if(!btn) return;
+        const id = Number(btn.dataset.id);
+        const action = btn.dataset.action;
+        
+        try{
+          if(action==="del"){
+            showConfirmModal("Xóa phòng?", "Hành động này không thể hoàn tác.", async () => {
+              try{
+                await apiDelete(`/admin/rooms/${id}`);
+                show("✅ Đã xóa.", "success");
+                await refresh();
+              }catch(e){ show("❌ Lỗi xóa: " + (e.message || e)); }
+            });
+          }
+          
+          if(action==="edit"){
+            const cur = await apiGet(`/admin/rooms/${id}`);
+            showRoomModal(cur, async (data) => {
+              try{
+                await apiPut(`/admin/rooms/${id}`, data);
+                show("✅ Đã cập nhật.", "success");
+                await refresh();
+              }catch(e){ show("❌ Lỗi cậ p nhật: " + (e.message || e)); }
+            });
+          }
+          
+          if(action==="seats"){
+            showGenerateSeatsModal(id, async (data) => {
+              try{
+                await apiPost(`/admin/rooms/generate-seats`, data);
+                show("✅ Đã tạo ghế.", "success");
+              }catch(e){ show("❌ Lỗi tạo ghế: " + (e.message || e)); }
+            });
+          }
+        }catch(err){ show(err.message); }
+      });
+    }
+    main().catch(e=>show(e.message));
+  </script>
+
+
+</body>
+</html>
+

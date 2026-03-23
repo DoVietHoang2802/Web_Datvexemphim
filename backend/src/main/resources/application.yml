@@ -1,0 +1,41 @@
+server:
+  port: ${PORT:9090}
+
+spring:
+  datasource:
+    url: jdbc:mysql://${MYSQLHOST:mysql.railway.internal}:${MYSQLPORT:3306}/${MYSQL_DATABASE:railway}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh
+    username: ${MYSQLUSER:root}
+    password: ${MYSQLPASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
+app:
+  jwt:
+    issuer: datvexemphim
+    secret: ${APP_JWT_SECRET:CHANGE_ME_TO_A_LONG_RANDOM_SECRET_32+_CHARS}
+    accessTokenMinutes: 240
+  upload:
+    dir: ${UPLOAD_DIR:uploads}
+  base-url: ${APP_BASE_URL:https://webdatvexemphim-production.up.railway.app}
+
+vnpay:
+  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  return-url: ${VNPAY_RETURN_URL:https://web-datvexemphim.vercel.app/checkout.html}
+  tmn-code: ${VNPAY_TMN_CODE:YOUR_TMN_CODE}
+  hash-secret: ${VNPAY_HASH_SECRET:YOUR_HASH_SECRET}
+  api-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+
+logging:
+  level:
+    org.hibernate.SQL: warn

@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Lịch chiếu</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    .showtime-card {
+      background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .showtime-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      border-color: rgba(102, 126, 234, 0.3);
+    }
+    .showtime-card.expired {
+      opacity: 0.6;
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+    .showtime-card.expired:hover {
+      transform: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+    .showtime-poster {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .showtime-poster-placeholder {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .showtime-content {
+      padding: 1rem;
+    }
+    .showtime-title {
+      font-weight: 700;
+      color: #fff;
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+    }
+    .showtime-genre {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .showtime-info {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.85rem;
+    }
+    .showtime-price {
+      font-weight: 700;
+      color: #48bb78;
+      font-size: 1.1rem;
+    }
+    .showtime-price.expired-price {
+      color: rgba(255, 255, 255, 0.4);
+      text-decoration: line-through;
+    }
+    .filter-section {
+      background: linear-gradient(145deg, #1e1e2f 0%, #252538 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .filter-section .form-control,
+    .filter-section .form-select {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 8px;
+    }
+    .filter-section .form-control:focus,
+    .filter-section .form-select:focus {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: #667eea;
+      color: #fff;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+    .filter-section .form-control::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    .filter-section .form-select option {
+      background: #1e1e2f;
+      color: #fff;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+    .no-poster {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #2d2d44 0%, #1a1a2e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .no-poster i {
+      font-size: 3rem;
+      color: rgba(255, 255, 255, 0.3);
+    }
+    .date-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0 1rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .date-header:first-child {
+      margin-top: 0;
+    }
+    .date-header h5 {
+      margin: 0;
+      font-weight: 600;
+      color: #fff;
+    }
+    .date-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .date-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 0.35rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .section-title.expired {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .section-title i {
+      font-size: 1.2rem;
+    }
+    .expired-badge {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .btn-disabled-custom {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+      color: rgba(255, 255, 255, 0.3) !important;
+      cursor: not-allowed;
+    }
+    .time-badge {
+      background: rgba(102, 126, 234, 0.2);
+      color: #a5b4fc;
+      padding: 0.25rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <main class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h3 class="mb-1 text-white">
+          <i class="fas fa-calendar-alt me-2" style="color: #667eea;"></i>
+          Lịch chiếu
+        </h3>
+        <p class="text-muted mb-0 small">Chọn suất chiếu để đặt vé</p>
+      </div>
+      <a class="btn btn-outline-light btn-sm" href="index.html">
+        <i class="fas fa-home me-1"></i> Trang chủ
+      </a>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="text-white-50 small mb-1"><i class="fas fa-search me-1"></i> Tìm kiếm</label>
+          <input type="text" class="form-control" id="searchInput" placeholder="Nhập tên phim...">
+        </div>
+        <div class="col-md-3">
+          <label class="text-white-50 small mb-1"><i class="fas fa-theater-masks me-1"></i> Thể loại</label>
+          <select class="form-select" id="genreFilter">
+            <option value="">Tất cả thể loại</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="text-white-50 small mb-1"><i class="fas fa-filter me-1"></i> Trạng thái</label>
+          <select class="form-select" id="statusFilter">
+            <option value="">Tất cả</option>
+            <option value="available">Hiện có</option>
+            <option value="expired">Đã hết suất</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-outline-light w-100" id="clearFilter">
+            <i class="fas fa-times"></i> Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="msg"></div>
+
+    <!-- Available Showtimes -->
+    <div id="availableSection">
+      <div class="section-title">
+        <i class="fas fa-play-circle" style="color: #48bb78;"></i>
+        <h5 class="mb-0 text-white">Suất chiếu hiện có</h5>
+        <span class="badge" style="background: rgba(72, 187, 120, 0.2); color: #6ee7b7;" id="availableCount">0</span>
+      </div>
+      <div id="availableList" class="row g-3"></div>
+    </div>
+
+    <!-- Expired Showtimes -->
+    <div id="expiredSection" style="display: none;">
+      <div class="section-title expired">
+        <i class="fas fa-history" style="color: rgba(255,255,255,0.4);"></i>
+        <h5 class="mb-0">Suất chiếu đã hết</h5>
+        <span class="badge" style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5);" id="expiredCount">0</span>
+      </div>
+      <div id="expiredList" class="row g-3"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/js/config.js"></script>
+  <script type="module">
+    import { apiGet } from "./assets/js/api.js";
+    import { formatTime, formatDate, formatVnd, setupNavbar } from "./assets/js/app.js";
+
+    let allShowtimes = [];
+    let genres = [];
+
+    async function loadNavbar(){
+      const html = await fetch("./partials/navbar.html").then(r=>r.text());
+      document.querySelector("#navbar").innerHTML = html;
+      setupNavbar();
+    }
+
+    function show(msg, type="danger"){
+      document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
+    }
+
+    function getGenreIcon(genre) {
+      const icons = {
+        'Hành động': 'fa-fist-raised',
+        'Tình cảm': 'fa-heart',
+        'Hài hước': 'fa-laugh-beam',
+        'Kinh dị': 'fa-skull-crossbones',
+        'Khoa học viễn tưởng': 'fa-rocket',
+        'Phiêu lưu': 'fa-compass',
+        'Hoạt hình': 'fa-film',
+        'Khác': 'fa-theater-masks'
+      };
+      return icons[genre] || 'fa-film';
+    }
+
+    function isExpired(startTime) {
+      return new Date(startTime) < new Date();
+    }
+
+    function showtimeCard(s, expired = false) {
+      const posterHtml = s.posterUrl
+        ? `<img class="showtime-poster" src="${s.posterUrl}" alt="${s.movieTitle}" onerror="this.outerHTML='<div class=\\'no-poster\\'><i class=\\'fas fa-film\\'></i></div>'">`
+        : `<div class="no-poster"><i class="fas fa-film"></i></div>`;
+
+      const bookingBtn = expired
+        ? `<button class="btn btn-disabled-custom btn-sm w-100" disabled>
+            <i class="fas fa-lock me-1"></i> Đã hết suất
+           </button>`
+        : `<a class="btn btn-brand btn-sm w-100" href="seatmap.html?showtimeId=${s.id}">
+            <i class="fas fa-ticket-alt"></i> Đặt vé
+           </a>`;
+
+      return `
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="showtime-card ${expired ? 'expired' : ''}">
+            ${posterHtml}
+            <div class="showtime-content">
+              <div class="showtime-title">${s.movieTitle}</div>
+              ${s.genre ? `<span class="showtime-genre"><i class="fas ${getGenreIcon(s.genre)}"></i> ${s.genre}</span>` : ''}
+              <div class="showtime-info mb-2">
+                <div class="mb-1">
+                  <i class="fas fa-door me-1"></i> ${s.roomName}
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <span class="time-badge">
+                    <i class="fas fa-clock me-1"></i>${formatTime(s.startTime)}
+                  </span>
+                  ${expired ? '<span class="expired-badge"><i class="fas fa-ban me-1"></i>Đã hết</span>' : ''}
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="showtime-price ${expired ? 'expired-price' : ''}">${formatVnd(s.price)}</span>
+                ${bookingBtn}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderShowtimes(list, statusFilter = '') {
+      const availableList = document.querySelector("#availableList");
+      const expiredList = document.querySelector("#expiredList");
+      const availableSection = document.querySelector("#availableSection");
+      const expiredSection = document.querySelector("#expiredSection");
+
+      const available = list.filter(s => !isExpired(s.startTime));
+      const expired = list.filter(s => isExpired(s.startTime));
+
+      // Group available by date
+      const availableByDate = {};
+      available.forEach(s => {
+        const dateKey = formatDate(s.startTime);
+        if (!availableByDate[dateKey]) availableByDate[dateKey] = [];
+        availableByDate[dateKey].push(s);
+      });
+
+      // Group expired by date
+      const expiredByDate = {};
+      expired.forEach(s => {
+        const dateKey = formatDate(s.startTime);
+        if (!expiredByDate[dateKey]) expiredByDate[dateKey] = [];
+        expiredByDate[dateKey].push(s);
+      });
+
+      // Render available
+      if (statusFilter === 'expired') {
+        availableSection.style.display = 'none';
+      } else {
+        availableSection.style.display = 'block';
+        document.querySelector("#availableCount").textContent = available.length;
+
+        if (available.length === 0) {
+          availableList.innerHTML = `
+            <div class="col-12">
+              <div class="empty-state">
+                <i class="fas fa-calendar-times"></i>
+                <div>Không có suất chiếu nào</div>
+              </div>
+            </div>
+          `;
+        } else {
+          let html = '';
+          Object.keys(availableByDate).sort().forEach(date => {
+            html += `
+              <div class="col-12">
+                <div class="date-header">
+                  <span class="date-badge">${date}</span>
+                </div>
+              </div>
+              ${availableByDate[date].map(s => showtimeCard(s, false)).join('')}
+            `;
+          });
+          availableList.innerHTML = html;
+        }
+      }
+
+      // Render expired
+      if (statusFilter === 'available') {
+        expiredSection.style.display = 'none';
+      } else {
+        expiredSection.style.display = 'block';
+        document.querySelector("#expiredCount").textContent = expired.length;
+
+        if (expired.length === 0) {
+          expiredList.innerHTML = '';
+        } else {
+          let html = '';
+          Object.keys(expiredByDate).sort().reverse().forEach(date => {
+            html += `
+              <div class="col-12">
+                <div class="date-header">
+                  <span class="date-badge" style="background: rgba(255,255,255,0.1);">${date}</span>
+                </div>
+              </div>
+              ${expiredByDate[date].map(s => showtimeCard(s, true)).join('')}
+            `;
+          });
+          expiredList.innerHTML = html;
+        }
+      }
+    }
+
+    function filterShowtimes() {
+      const search = document.querySelector("#searchInput").value.toLowerCase();
+      const genre = document.querySelector("#genreFilter").value;
+      const statusFilter = document.querySelector("#statusFilter").value;
+
+      let filtered = allShowtimes.filter(s => {
+        if (search && !s.movieTitle.toLowerCase().includes(search)) return false;
+        if (genre && s.genre !== genre) return false;
+        if (statusFilter === 'available' && isExpired(s.startTime)) return false;
+        if (statusFilter === 'expired' && !isExpired(s.startTime)) return false;
+        return true;
+      });
+
+      renderShowtimes(filtered, statusFilter);
+    }
+
+    async function main(){
+      await loadNavbar();
+
+      // Load genres for filter
+      try {
+        genres = await apiGet("/movies/genres");
+        const genreSelect = document.querySelector("#genreFilter");
+        genres.forEach(g => {
+          const option = document.createElement("option");
+          option.value = g.name;
+          option.textContent = g.name;
+          genreSelect.appendChild(option);
+        });
+      } catch(e) {
+        console.log("No genres loaded");
+      }
+
+      // Load showtimes
+      allShowtimes = await apiGet("/showtimes");
+      renderShowtimes(allShowtimes);
+
+      // Setup filter events
+      document.querySelector("#searchInput").addEventListener("input", filterShowtimes);
+      document.querySelector("#genreFilter").addEventListener("change", filterShowtimes);
+      document.querySelector("#statusFilter").addEventListener("change", filterShowtimes);
+      document.querySelector("#clearFilter").addEventListener("click", () => {
+        document.querySelector("#searchInput").value = "";
+        document.querySelector("#genreFilter").value = "";
+        document.querySelector("#statusFilter").value = "";
+        renderShowtimes(allShowtimes);
+      });
+    }
+    main().catch(e=>show(e.message));
+  </script>
+</body>
+</html>
