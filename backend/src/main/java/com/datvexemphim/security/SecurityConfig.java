@@ -3,6 +3,8 @@ package com.datvexemphim.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -78,6 +80,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/movies/**", "/api/showtimes/**", "/api/seatmap/**").permitAll()
                 .requestMatchers("/api/food/categories", "/api/food/items", "/api/food/items/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/community/messages", "/api/community/stream", "/api/community/online").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/upload/**").hasRole("ADMIN")
                 .requestMatchers("/api/food/**").authenticated()
