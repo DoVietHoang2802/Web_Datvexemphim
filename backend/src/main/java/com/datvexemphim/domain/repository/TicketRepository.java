@@ -26,10 +26,18 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     long countByShowtimeIdAndStatus(Long showtimeId, TicketStatus status);
 
-    /** Vé đang rao bán */
-    List<Ticket> findByStatus(TicketStatus status);
+    /** Vé đang rao bán - load đủ thông tin cho market */
+    @org.springframework.data.jpa.repository.EntityGraph(
+        attributePaths = {"showtime.movie", "showtime.room", "seat", "owner"}
+    )
+    @Query("SELECT t FROM Ticket t WHERE t.status = :status")
+    List<Ticket> findByStatus(@Param("status") TicketStatus status);
 
-    /** Vé của 1 user theo trạng thái */
-    List<Ticket> findByOwnerIdAndStatus(Long ownerId, TicketStatus status);
+    /** Vé của 1 user theo trạng thái - load đủ thông tin */
+    @org.springframework.data.jpa.repository.EntityGraph(
+        attributePaths = {"showtime.movie", "showtime.room", "seat", "owner"}
+    )
+    @Query("SELECT t FROM Ticket t WHERE t.owner.id = :ownerId AND t.status = :status")
+    List<Ticket> findByOwnerIdAndStatus(@Param("ownerId") Long ownerId, @Param("status") TicketStatus status);
 }
 
