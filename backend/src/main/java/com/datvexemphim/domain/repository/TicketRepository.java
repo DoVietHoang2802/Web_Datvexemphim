@@ -44,5 +44,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
         attributePaths = {"showtime", "seat", "owner", "payment"}
     )
     List<Ticket> findByShowtimeId(Long showtimeId);
+
+    /** Đếm vé chưa bị hủy của 1 suất chiếu */
+    @Query("SELECT COUNT(t) FROM Ticket t WHERE t.showtime.id = :showtimeId AND t.status <> 'CANCELLED'")
+    long countNonCancelledByShowtimeId(@Param("showtimeId") Long showtimeId);
 }
 

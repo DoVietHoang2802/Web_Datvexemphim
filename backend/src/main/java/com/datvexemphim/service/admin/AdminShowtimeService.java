@@ -93,6 +93,12 @@ public class AdminShowtimeService {
         if (st.getStatus() == ShowtimeStatus.ENDED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Suất chiếu đã ngừng, không thể chỉnh sửa.");
         }
+        // Không cho sửa nếu đã có người đặt vé
+        long bookedCount = ticketRepository.countNonCancelledByShowtimeId(id);
+        if (bookedCount > 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Suất chiếu đã có " + bookedCount + " vé được đặt, không thể chỉnh sửa. Chỉ có thể kết thúc hoặc xóa.");
+        }
         apply(st, req);
         return showtimeRepository.save(st);
     }

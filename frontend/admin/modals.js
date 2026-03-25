@@ -411,18 +411,16 @@ export function showShowtimeModal(defaults, movies = [], rooms = [], onSubmit) {
         dateFormat: "Y-m-d H:i",
         time_24hr: true,
         minuteIncrement: 5,
-        defaultValue: defaults?.startTime ? new Date(defaults.startTime) : null,
-        locale: "vi"
+        defaultValue: defaults?.startTime ? new Date(defaults.startTime) : null
       });
-      
+
       // Initialize flatpickr for end time
       flatpickr(endInput, {
         enableTime: true,
         dateFormat: "Y-m-d H:i",
         time_24hr: true,
         minuteIncrement: 5,
-        defaultValue: defaults?.endTime ? new Date(defaults.endTime) : null,
-        locale: "vi"
+        defaultValue: defaults?.endTime ? new Date(defaults.endTime) : null
       });
     };
     document.head.appendChild(script);
