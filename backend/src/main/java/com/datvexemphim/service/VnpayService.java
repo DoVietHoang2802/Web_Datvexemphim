@@ -1,7 +1,6 @@
 package com.datvexemphim.service;
 
 import com.datvexemphim.config.VnpayConfig;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,11 +13,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class VnpayService {
 
     private static final Logger log = LoggerFactory.getLogger(VnpayService.class);
     private final VnpayConfig vnpayConfig;
+
+    public VnpayService(VnpayConfig vnpayConfig) {
+        this.vnpayConfig = vnpayConfig;
+    }
 
     /**
      * Tạo URL thanh toán VNPay

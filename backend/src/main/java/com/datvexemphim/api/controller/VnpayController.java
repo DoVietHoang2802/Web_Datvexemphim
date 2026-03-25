@@ -5,7 +5,6 @@ import com.datvexemphim.domain.enums.PaymentStatus;
 import com.datvexemphim.domain.repository.PaymentRepository;
 import com.datvexemphim.domain.repository.UserRepository;
 import com.datvexemphim.service.VnpayService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,13 +12,18 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/vnpay")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class VnpayController {
 
     private final VnpayService vnpayService;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+
+    public VnpayController(VnpayService vnpayService, PaymentRepository paymentRepository, UserRepository userRepository) {
+        this.vnpayService = vnpayService;
+        this.paymentRepository = paymentRepository;
+        this.userRepository = userRepository;
+    }
 
     /**
      * Tạo URL thanh toán VNPay
