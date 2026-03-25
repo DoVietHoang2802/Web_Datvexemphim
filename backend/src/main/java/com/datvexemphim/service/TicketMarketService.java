@@ -117,21 +117,52 @@ public class TicketMarketService {
         }
 
         // Vé phải đang AVAILABLE
+        if (ticket.getStatus() == TicketStatus.SOLD) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vé này đã có người mua.");
+        }
         if (ticket.getStatus() != TicketStatus.AVAILABLE) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vé không còn đang rao bán.");
         }
 
-        // Kiểm tra đã request chưa
-        if (ticketRequestRepository.existsByTicketIdAndRequesterIdAndStatus(
-                ticketId, requester.getId(), TicketRequestStatus.PENDING)) {
+        // 1 user chỉ có 1 request / vé (bảng có unique key)
+        TicketRequest existing = ticketRequestRepository
+                .findByTicketIdAndRequesterId(ticketId, requester.getId())
+                .orElse(null);
+
+        if (existing == null) {
+            TicketRequest req = new TicketRequest();
+            req.setTicket(ticket);
+            req.setRequester(requester);
+            req.setStatus(TicketRequestStatus.PENDING);
+            req.setCreatedAt(Instant.now());
+            req.setRespondedAt(null);
+            ticketRequestRepository.save(req);
+            return;
+        }
+
+        // Nếu đã pending thì báo luôn
+        if (existing.getStatus() == TicketRequestStatus.PENDING) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bạn đã gửi yêu cầu rồi.");
         }
 
-        TicketRequest req = new TicketRequest();
-        req.setTicket(ticket);
-        req.setRequester(requester);
-        req.setStatus(TicketRequestStatus.PENDING);
-        ticketRequestRepository.save(req);
+        // Nếu đã accept thì vé này coi như đã xử lý xong
+        if (existing.getStatus() == TicketRequestStatus.ACCEPTED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Yêu cầu của bạn đã được duyệt trước đó.");
+        }
+
+        // REJECTED: cho request lại sau 10s
+        Instant now = Instant.now();
+        Instant respondedAt = existing.getRespondedAt();
+        if (respondedAt != null && respondedAt.plusSeconds(10).isAfter(now)) {
+            long wait = respondedAt.plusSeconds(10).getEpochSecond() - now.getEpochSecond();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Bạn vừa bị từ chối. Vui lòng thử lại sau " + wait + " giây.");
+        }
+
+        existing.setStatus(TicketRequestStatus.PENDING);
+        existing.setCreatedAt(now);
+        existing.setRespondedAt(null);
+        ticketRequestRepository.save(existing);
     }
 
     /**
@@ -157,7 +188,7 @@ public class TicketMarketService {
      */
     @Transactional(readOnly = true)
     public List<TicketRequestDTO> getMyRequests(Long userId) {
-        return ticketRequestRepository.findByRequesterIdAndStatusOrderByCreatedAtDesc(userId, TicketRequestStatus.PENDING)
+        return ticketRequestRepository.findByRequesterIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(this::toRequestDTO)
                 .toList();
@@ -182,8 +213,16 @@ public class TicketMarketService {
         }
 
         // Phải đang AVAILABLE mới duyệt được
+        if (ticket.getStatus() == TicketStatus.SOLD) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vé này đã có người mua.");
+        }
         if (ticket.getStatus() != TicketStatus.AVAILABLE) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vé không còn đang rao bán.");
+        }
+
+        // Request phải là pending mới xử lý
+        if (ticketRequest.getStatus() != TicketRequestStatus.PENDING) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Yêu cầu này đã được xử lý rồi.");
         }
 
         if (accept) {

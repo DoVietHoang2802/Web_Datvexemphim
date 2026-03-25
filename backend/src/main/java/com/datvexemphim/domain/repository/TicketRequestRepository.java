@@ -33,4 +33,7 @@ public interface TicketRequestRepository extends JpaRepository<TicketRequest, Lo
 
     /** Danh sách request của 1 user theo trạng thái */
     List<TicketRequest> findByRequesterIdAndStatusOrderByCreatedAtDesc(Long requesterId, TicketRequestStatus status);
+
+    /** Tất cả request của 1 user */
+    List<TicketRequest> findByRequesterIdOrderByCreatedAtDesc(Long requesterId);
 }

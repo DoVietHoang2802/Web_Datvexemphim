@@ -171,6 +171,110 @@
       gap: .5rem;
     }
 
+
+    .notify-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .notify-bell {
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.08);
+      color: #fff;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .notify-bell:hover { background: rgba(255,255,255,.15); }
+    .notify-bell.shake { animation: bellShake .7s ease; }
+
+    .notify-dot {
+      position: absolute;
+      right: -5px;
+      top: -5px;
+      min-width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #ef4444;
+      color: #fff;
+      font-size: .66rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #1b1f39;
+      font-weight: 700;
+      padding: 0 4px;
+    }
+
+    .notify-panel {
+      position: absolute;
+      top: 42px;
+      right: 0;
+      width: 350px;
+      max-height: 420px;
+      overflow-y: auto;
+      z-index: 40;
+      border: 1px solid var(--border);
+      border-radius: .85rem;
+      background: #181a31;
+      box-shadow: 0 14px 30px rgba(0,0,0,.32);
+      display: none;
+    }
+
+    .notify-panel.show { display: block; }
+
+    .notify-head {
+      padding: .6rem .8rem;
+      border-bottom: 1px solid var(--border);
+      font-size: .82rem;
+      color: #cdd7ff;
+      font-weight: 700;
+      background: rgba(102,126,234,.2);
+    }
+
+    .notify-item {
+      padding: .65rem .75rem;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      font-size: .8rem;
+    }
+
+    .notify-item:last-child { border-bottom: none; }
+
+    .notify-actions {
+      display: flex;
+      gap: .4rem;
+      margin-top: .45rem;
+    }
+
+    .notify-btn {
+      border: none;
+      border-radius: .45rem;
+      padding: .25rem .5rem;
+      font-size: .75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .notify-btn.ok { background: #22c55e; color: #fff; }
+    .notify-btn.no { background: #ef4444; color: #fff; }
+
+    .pin-system {
+      margin: .6rem .9rem 0;
+      border: 1px dashed rgba(251,191,36,.55);
+      background: rgba(251,191,36,.11);
+      color: #fde68a;
+      border-radius: .65rem;
+      font-size: .78rem;
+      padding: .4rem .6rem;
+    }
+
     .global-chat-title {
       margin: 0;
       font-size: 1rem;
@@ -347,6 +451,14 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes bellShake {
+      0%,100% { transform: rotate(0); }
+      20% { transform: rotate(12deg); }
+      40% { transform: rotate(-10deg); }
+      60% { transform: rotate(8deg); }
+      80% { transform: rotate(-6deg); }
+    }
+
     @media (max-width: 992px) {
       .market-layout {
         grid-template-columns: 1fr;
@@ -398,7 +510,19 @@
           <h6 class="global-chat-title">💬 Chat Pass Vé</h6>
           <div class="d-flex align-items-center gap-2">
             <span class="online-chip"><i class="fas fa-circle me-1" style="font-size:.55rem;color:#22c55e"></i><span id="onlineCount">0</span> online</span>
+            <div class="notify-wrap" id="notifyWrap">
+              <button class="notify-bell" id="notifyBell" onclick="toggleNotifyPanel()"><i class="fas fa-bell"></i></button>
+              <span class="notify-dot" id="notifyDot">0</span>
+              <div class="notify-panel" id="notifyPanel">
+                <div class="notify-head">Yêu cầu pass vé chờ xử lý</div>
+                <div id="notifyList" class="notify-body"></div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div class="pin-system" id="pinSystem">
+          📌 Hệ thống: Click vào 1 vé bên trái để tạo tin nhắn hỏi mua nhanh.
         </div>
 
         <div class="global-chat-quick">
@@ -431,10 +555,16 @@
 
     let currentUserId = null;
     let myRequestedTicketIds = new Set();
+    let allMyRequests = [];
     let pendingRequests = [];
+    let incomingRequests = [];
     let eventSource = null;
     let isAutoScrollEnabled = true;
     let loadedCommunity = false;
+    let previousIncomingCount = 0;
+
+    const bellAudio = new Audio("data:audio/wav;base64,UklGRjQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YRAAAAAAAP8AAP8AAP8AAP8AAP8AAP8AAP8AAP8=");
+    bellAudio.volume = 0.22;
 
     const mockMessages = [
       { id: -1, senderId: 1, senderFullName: 'huy', content: 'Mình đang pass vé Zombie 20:00 ghế A1', createdAt: new Date().toISOString() },
@@ -450,10 +580,12 @@
       await Promise.all([
         loadTickets(),
         loadMyRequests(),
+        loadIncomingRequests(),
         loadCommunityMessages()
       ]);
 
       connectCommunityStream();
+      setInterval(refreshRequestNotifications, 3000);
     }
 
     async function loadNavbar() {
@@ -503,11 +635,91 @@
     async function loadMyRequests() {
       try {
         const myReqs = await apiGet('/market/my-requests');
+        allMyRequests = myReqs;
         myRequestedTicketIds = new Set(myReqs.map(r => r.ticketId));
         pendingRequests = myReqs.filter(r => r.status === 'PENDING');
       } catch (e) {
         // ignore
       }
+    }
+
+    async function loadIncomingRequests() {
+      try {
+        const myListed = await apiGet('/market/my-listed');
+        const all = await Promise.all(myListed.map(t => apiGet(`/market/requests/${t.ticketId}`)));
+        incomingRequests = all.flat().filter(r => r.status === 'PENDING');
+      } catch (e) {
+        incomingRequests = [];
+      }
+    }
+
+    async function refreshRequestNotifications() {
+      await Promise.all([loadMyRequests(), loadIncomingRequests()]);
+      renderRequestNotifications();
+      renderTickets(await apiGet('/market/tickets').catch(() => []));
+    }
+
+    function renderRequestNotifications() {
+      const dot = document.getElementById('notifyDot');
+      const bell = document.getElementById('notifyBell');
+      const list = document.getElementById('notifyList');
+
+      const count = incomingRequests.length;
+      if (count > 0) {
+        dot.style.display = 'inline-flex';
+        dot.textContent = count > 9 ? '9+' : String(count);
+      } else {
+        dot.style.display = 'none';
+      }
+
+      if (count > previousIncomingCount && document.visibilityState === 'visible') {
+        bell.classList.remove('shake');
+        void bell.offsetWidth;
+        bell.classList.add('shake');
+        bellAudio.currentTime = 0;
+        bellAudio.play().catch(() => {});
+      }
+      previousIncomingCount = count;
+
+      if (count === 0) {
+        list.innerHTML = '<div class="notify-item text-secondary">Không có yêu cầu mới.</div>';
+        return;
+      }
+
+      list.innerHTML = incomingRequests.map(r => `
+        <div class="notify-item">
+          <div><strong>${escHtml(r.requesterFullName)}</strong> muốn nhận vé <strong>${escHtml(r.movieTitle)}</strong></div>
+          <div class="text-secondary mt-1">Ghế ${escHtml(r.seatCode)} • ${formatDate(r.showtimeStart)}</div>
+          <div class="notify-actions">
+            <button class="notify-btn ok" onclick="respondRequest(${r.id}, true)">Đồng ý</button>
+            <button class="notify-btn no" onclick="respondRequest(${r.id}, false)">Từ chối</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleNotifyPanel() {
+      document.getElementById('notifyPanel').classList.toggle('show');
+    }
+
+    async function respondRequest(requestId, accept) {
+      try {
+        await apiPost('/market/respond', { requestId, accept });
+        if (accept) {
+          showToast('Đồng ý pass vé thành công. Vé đã được bán.', 'success');
+          appendSystemPin('📌 Hệ thống: Một vé vừa được bán thành công. Các yêu cầu khác sẽ nhận trạng thái đã có người mua.');
+        } else {
+          showToast('Đã từ chối yêu cầu. Người mua có thể gửi lại sau 10 giây.', 'info');
+        }
+        await refreshRequestNotifications();
+      } catch (e) {
+        showToast(e.message || 'Xử lý yêu cầu thất bại', 'error');
+      }
+    }
+
+    function appendSystemPin(text) {
+      const pin = document.getElementById('pinSystem');
+      if (pin) pin.textContent = text;
     }
 
     async function loadTickets() {
@@ -592,6 +804,7 @@
       const active = document.querySelector(`[data-ticket-id="${ticketId}"]`);
       if (active) active.classList.add('active-ticket');
 
+      appendSystemPin(`📌 Hệ thống: ${sellerName} đang pass vé ${movieTitle} ghế ${seatCode}.`);
       if (focus) input.focus();
     }
 
@@ -654,6 +867,10 @@
       const wrapper = document.createElement('div');
       wrapper.innerHTML = renderMsgHtml(msg);
       box.appendChild(wrapper.firstElementChild);
+
+      if (typeof msg?.content === 'string' && /pass vé|bán vé|còn vé/i.test(msg.content)) {
+        appendSystemPin(`📌 Hệ thống: ${msg.senderFullName || 'Một người dùng'} đang trao đổi pass vé.`);
+      }
 
       if (isRealtime && isAutoScrollEnabled) {
         scrollToBottom(box);
@@ -744,6 +961,14 @@
     window.prefillFromTicket = prefillFromTicket;
     window.quickMessage = quickMessage;
     window.logoutNow = logoutNow;
+    window.toggleNotifyPanel = toggleNotifyPanel;
+    window.respondRequest = respondRequest;
+
+    document.addEventListener('click', (e) => {
+      const wrap = document.getElementById('notifyWrap');
+      const panel = document.getElementById('notifyPanel');
+      if (!wrap?.contains(e.target)) panel?.classList.remove('show');
+    });
 
     init();
   </script>

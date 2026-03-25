@@ -7,10 +7,9 @@ import com.datvexemphim.domain.entity.User;
 import com.datvexemphim.domain.repository.CommunityMessageRepository;
 import com.datvexemphim.service.CurrentUserService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -38,12 +37,10 @@ public class CommunityController {
     }
 
     /** Lấy lịch sử tin nhắn cộng đồng (mới nhất 100 tin, theo thứ tự cũ -> mới) */
+    @Transactional(readOnly = true)
     @GetMapping("/messages")
     public List<CommunityMessageDTO> getMessages() {
-        List<CommunityMessage> latest = messageRepository.findAll(
-                PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt"))
-        ).getContent();
-
+        List<CommunityMessage> latest = messageRepository.findTop100ByOrderByCreatedAtDesc();
         List<CommunityMessageDTO> dto = latest.stream().map(this::toDTO).toList();
         Collections.reverse(dto);
         return dto;
