@@ -69,7 +69,8 @@ public class AdminShowtimeService {
                         s.getRoom().getName(),
                         s.getStartTime(),
                         s.getEndTime(),
-                        s.getPrice()
+                        s.getPrice(),
+                        s.getStatus().name()
                 ))
                 .toList();
     }
@@ -89,6 +90,9 @@ public class AdminShowtimeService {
 
     public Showtime update(Long id, ShowtimeUpsertRequest req) {
         Showtime st = get(id);
+        if (st.getStatus() == ShowtimeStatus.ENDED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Suất chiếu đã ngừng, không thể chỉnh sửa.");
+        }
         apply(st, req);
         return showtimeRepository.save(st);
     }

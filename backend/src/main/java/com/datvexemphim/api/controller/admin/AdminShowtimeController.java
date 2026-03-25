@@ -37,7 +37,8 @@ public class AdminShowtimeController {
                 s.getRoom().getName(),
                 s.getStartTime(),
                 s.getEndTime(),
-                s.getPrice()
+                s.getPrice(),
+                s.getStatus().name()
         );
     }
 
@@ -52,7 +53,8 @@ public class AdminShowtimeController {
                 s.getRoom().getName(),
                 s.getStartTime(),
                 s.getEndTime(),
-                s.getPrice()
+                s.getPrice(),
+                s.getStatus().name()
         );
     }
 
@@ -67,7 +69,8 @@ public class AdminShowtimeController {
                 s.getRoom().getName(),
                 s.getStartTime(),
                 s.getEndTime(),
-                s.getPrice()
+                s.getPrice(),
+                s.getStatus().name()
         );
     }
 

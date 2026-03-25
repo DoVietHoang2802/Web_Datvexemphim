@@ -10,7 +10,8 @@ public record AdminShowtimeDto(
         String roomName,
         Instant startTime,
         Instant endTime,
-        Long price
+        Long price,
+        String status
 ) {
 }
 
