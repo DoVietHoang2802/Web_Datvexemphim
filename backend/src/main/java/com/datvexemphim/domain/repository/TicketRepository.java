@@ -25,5 +25,11 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByIdIn(Collection<Long> ids);
 
     long countByShowtimeIdAndStatus(Long showtimeId, TicketStatus status);
+
+    /** Vé đang rao bán */
+    List<Ticket> findByStatus(TicketStatus status);
+
+    /** Vé của 1 user theo trạng thái */
+    List<Ticket> findByOwnerIdAndStatus(Long ownerId, TicketStatus status);
 }
 

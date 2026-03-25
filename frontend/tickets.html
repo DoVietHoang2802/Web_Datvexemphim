@@ -128,6 +128,18 @@
       color: #fca5a5;
       border: 1px solid rgba(239, 68, 68, 0.3);
     }
+    .status-badge.available {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fcd34d;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .status-badge.sold {
+      background: rgba(102, 126, 234, 0.2);
+      color: #a5b4fc;
+      border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+    .ticket-card.status-available { border-left: 4px solid #f59e0b; }
+    .ticket-card.status-sold { border-left: 4px solid #667eea; opacity: 0.75; }
     .ticket-details {
       padding: 0 1.25rem 1rem;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -231,6 +243,9 @@
         <a class="btn btn-brand btn-sm" href="showtimes.html">
           <i class="fas fa-plus me-1"></i> Đặt thêm vé
         </a>
+        <a class="btn btn-outline-warning btn-sm" href="ticket-market.html">
+          <i class="fas fa-store me-1"></i> Chợ Pass Vé
+        </a>
       </div>
     </div>
 
@@ -242,8 +257,14 @@
       <button class="btn btn-outline-light" data-filter="CONFIRMED">
         <i class="fas fa-check-circle me-1"></i> Đã đặt
       </button>
+      <button class="btn btn-outline-light" data-filter="AVAILABLE">
+        <i class="fas fa-store me-1"></i> Đang bán
+      </button>
+      <button class="btn btn-outline-light" data-filter="SOLD">
+        <i class="fas fa-handshake me-1"></i> Đã bán
+      </button>
       <button class="btn btn-outline-light" data-filter="PENDING">
-        <i class="fas fa-clock me-1"></i> Chờ thanh toán
+        <i class="fas fa-clock me-1"></i> Chờ TT
       </button>
       <button class="btn btn-outline-light" data-filter="CANCELLED">
         <i class="fas fa-times-circle me-1"></i> Đã hủy
@@ -294,6 +315,8 @@
         case 'CONFIRMED': return 'status-confirmed';
         case 'PENDING': return 'status-pending';
         case 'CANCELLED': return 'status-cancelled';
+        case 'AVAILABLE': return 'status-available';
+        case 'SOLD': return 'status-sold';
         default: return '';
       }
     }
@@ -303,6 +326,8 @@
         case 'CONFIRMED': return '<span class="status-badge confirmed"><i class="fas fa-check me-1"></i>Đã đặt</span>';
         case 'PENDING': return '<span class="status-badge pending"><i class="fas fa-clock me-1"></i>Chờ TT</span>';
         case 'CANCELLED': return '<span class="status-badge cancelled"><i class="fas fa-ban me-1"></i>Đã hủy</span>';
+        case 'AVAILABLE': return '<span class="status-badge available"><i class="fas fa-store me-1"></i>Đang bán</span>';
+        case 'SOLD': return '<span class="status-badge sold"><i class="fas fa-handshake me-1"></i>Đã bán</span>';
         default: return '';
       }
     }
@@ -311,8 +336,9 @@
       const statusClass = getStatusClass(t.status);
       const statusBadge = getStatusBadge(t.status);
       const canCancel = t.status === 'CONFIRMED';
-      const canTransfer = t.status === 'CONFIRMED';
-      const canDelete = t.status === 'CANCELLED';
+      const canList = t.status === 'CONFIRMED';
+      const canUnlist = t.status === 'AVAILABLE';
+      const canDelete = t.status === 'CANCELLED' || t.status === 'SOLD';
       const canPay = t.status === 'PENDING';
       const totalPrice = (t.price || 0) + (t.foodTotalPrice || 0);
 
@@ -387,9 +413,14 @@
                   <i class="fas fa-times me-1"></i> Hủy vé
                 </button>
               ` : ''}
-              ${canTransfer ? `
-                <button class="btn btn-sm btn-outline-light" data-action="transfer" data-id="${t.ticketId}">
-                  <i class="fas fa-share-alt me-1"></i> Chuyển vé
+              ${canList ? `
+                <button class="btn btn-sm btn-outline-warning" data-action="list" data-id="${t.ticketId}">
+                  <i class="fas fa-tags me-1"></i> Đăng bán vé
+                </button>
+              ` : ''}
+              ${canUnlist ? `
+                <button class="btn btn-sm btn-outline-info" data-action="unlist" data-id="${t.ticketId}">
+                  <i class="fas fa-undo me-1"></i> Gỡ khỏi chợ
                 </button>
               ` : ''}
               ${canCancel && !canPay ? `
@@ -423,6 +454,8 @@
         if (currentFilter === 'CONFIRMED') emptyMsg = 'Chưa có vé nào được đặt.';
         else if (currentFilter === 'PENDING') emptyMsg = 'Không có vé chờ thanh toán.';
         else if (currentFilter === 'CANCELLED') emptyMsg = 'Không có vé nào bị hủy.';
+        else if (currentFilter === 'AVAILABLE') emptyMsg = 'Không có vé nào đang được bán.';
+        else if (currentFilter === 'SOLD') emptyMsg = 'Không có vé nào đã bán.';
 
         container.innerHTML = `
           <div class="empty-state">
@@ -467,15 +500,20 @@
           showToast('Hủy vé thành công! Ghế đã được giải phóng.', 'success');
           await refresh();
         }
-        if (action === 'transfer') {
-          const toEmail = prompt('Nhập email người nhận vé:');
-          if (!toEmail) return;
-          await apiPost(`/tickets/transfer`, { ticketId: id, toEmail });
-          showToast('Chuyển vé thành công.', 'success');
+        if (action === 'list') {
+          if (!confirm('Đăng vé này lên Chợ Pass Vé?\n\nNgười khác có thể nhìn thấy và yêu cầu nhận vé.')) return;
+          await apiPost('/market/list', { ticketId: id });
+          showToast('Vé đã được đăng lên Chợ Pass Vé!', 'success');
+          await refresh();
+        }
+        if (action === 'unlist') {
+          if (!confirm('Gỡ vé khỏi Chợ Pass Vé?')) return;
+          await apiPost('/market/unlist', { ticketId: id });
+          showToast('Vé đã được gỡ khỏi Chợ.', 'success');
           await refresh();
         }
         if (action === 'delete') {
-          if (!confirm('Bạn có chắc muốn xóa vé đã hủy?\n\nHành động này không thể hoàn tác.')) return;
+          if (!confirm('Bạn có chắc muốn xóa vé?\n\nHành động này không thể hoàn tác.')) return;
           await apiDelete(`/tickets/${id}`);
           showToast('Xóa vé thành công.', 'success');
           await refresh();

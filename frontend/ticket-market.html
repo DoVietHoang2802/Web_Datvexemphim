@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chợ Pass Vé - DATVEXEMPHIM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    body { background: #0f0f23; color: #fff; min-height: 100vh; }
+    .page-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+      border-radius: 0 0 1rem 1rem;
+    }
+    .market-card {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      transition: all 0.3s;
+      height: 100%;
+    }
+    .market-card:hover {
+      border-color: #667eea;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(102,126,234,.2);
+    }
+    .movie-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 0.75rem;
+    }
+    .ticket-info {
+      font-size: 0.9rem;
+      color: #aaa;
+      margin-bottom: 0.3rem;
+    }
+    .ticket-info i { width: 20px; color: #764ba2; }
+    .price-tag {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #f59e0b;
+    }
+    .seller-badge {
+      background: rgba(102,126,234,.2);
+      color: #a5b4fc;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #666;
+    }
+    .empty-state i { font-size: 4rem; margin-bottom: 1rem; }
+    .btn-market {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-market:hover { opacity: 0.85; color: #fff; transform: scale(1.02); }
+    .btn-chat {
+      background: transparent;
+      border: 1px solid #667eea;
+      color: #a5b4fc;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      transition: all 0.3s;
+    }
+    .btn-chat:hover { background: rgba(102,126,234,.2); color: #fff; }
+    /* ===== Chat Modal ===== */
+    .chat-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 9998;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-modal-overlay.show { display: flex; }
+    .chat-modal-box {
+      background: #1a1a2e;
+      border: 1px solid #333;
+      border-radius: 1rem;
+      width: 420px;
+      max-width: 95vw;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-modal-header {
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-modal-header h6 { margin: 0; font-size: 0.95rem; }
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-height: 300px;
+    }
+    .chat-msg {
+      max-width: 75%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+    .chat-msg.me {
+      background: #667eea;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 0.25rem;
+    }
+    .chat-msg.other {
+      background: #2d2d44;
+      color: #ddd;
+      align-self: flex-start;
+      border-bottom-left-radius: 0.25rem;
+    }
+    .chat-msg-sender {
+      font-size: 0.72rem;
+      color: #888;
+      margin-bottom: 0.15rem;
+    }
+    .chat-msg-time {
+      font-size: 0.68rem;
+      color: rgba(255,255,255,.4);
+      text-align: right;
+      margin-top: 0.15rem;
+    }
+    .chat-input-area {
+      padding: 0.75rem;
+      border-top: 1px solid #333;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .chat-input-area input {
+      flex: 1;
+      background: #2d2d44;
+      border: 1px solid #444;
+      color: #fff;
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.88rem;
+    }
+    .chat-input-area input:focus { outline: none; border-color: #667eea; }
+    .toast-box {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .toast-msg {
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      color: #fff;
+      font-size: 0.88rem;
+      animation: slideIn 0.3s ease;
+    }
+    .toast-msg.success { background: #22c55e; }
+    .toast-msg.error { background: #ef4444; }
+    .toast-msg.info { background: #667eea; }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .loading-spinner {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem;
+    }
+    .btn-request {
+      background: #22c55e;
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-size: 0.88rem;
+    }
+    .btn-request:hover { background: #16a34a; color: #fff; }
+    .btn-request:disabled { background: #555; cursor: not-allowed; }
+    .login-prompt {
+      text-align: center;
+      padding: 3rem;
+      background: #1a1a2e;
+      border-radius: 1rem;
+      border: 1px solid #333;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div id="navbarContainer"></div>
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="mb-1"><i class="fas fa-tags me-2"></i>Chợ Pass Vé</h2>
+        <p class="mb-0 text-white-50">Mua bán & trao đổi vé xem phim an toàn</p>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-light text-dark fs-6" id="ticketCount">0 vé</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mb-5">
+  <!-- Login prompt (hidden if logged in) -->
+  <div id="loginPrompt" class="login-prompt" style="display:none;">
+    <i class="fas fa-lock mb-3" style="font-size:3rem;color:#667eea;"></i>
+    <h4>Vui lòng đăng nhập</h4>
+    <p class="text-muted mb-3">Bạn cần đăng nhập để xem và nhận vé</p>
+    <a href="login.html" class="btn btn-market">Đăng nhập ngay</a>
+  </div>
+
+  <!-- Ticket Grid -->
+  <div id="ticketGrid" class="row g-3">
+    <div class="loading-spinner col-12">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-box" id="toastBox"></div>
+
+<!-- Chat Modal -->
+<div class="chat-modal-overlay" id="chatOverlay">
+  <div class="chat-modal-box">
+    <div class="chat-modal-header">
+      <h6 id="chatTitle"><i class="fas fa-comments me-2"></i>Tin nhắn</h6>
+      <div>
+        <button class="btn btn-sm btn-light me-1" id="btnRequestTicket" style="display:none;">
+          <i class="fas fa-hand-holding-heart me-1"></i>Nhận vé
+        </button>
+        <button class="btn btn-sm btn-outline-light" onclick="closeChat()">&times;</button>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="text-center text-muted mt-5">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p class="mt-2 mb-0">Đang tải tin nhắn...</p>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="btn btn-market" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap & API -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+  import { apiGet, apiPost, getToken } from './assets/js/api.js';
+
+  // ===== State =====
+  let currentUserId = null;
+  let currentChatTicketId = null;
+  let chatPollInterval = null;
+  let lastMessageCount = 0;
+
+  // ===== Init =====
+  async function init() {
+    await loadNavbar();
+    await loadTickets();
+    // Refresh every 10s
+    setInterval(loadTickets, 10000);
+  }
+
+  async function loadNavbar() {
+    const res = await fetch('./partials/navbar.html');
+    const html = await res.text();
+    document.getElementById('navbarContainer').innerHTML = html;
+    updateAuthUI();
+  }
+
+  function updateAuthUI() {
+    const token = getToken();
+    const authArea = document.getElementById('authArea');
+    const loginPrompt = document.getElementById('loginPrompt');
+    const ticketGrid = document.getElementById('ticketGrid');
+
+    if (!token) {
+      if (authArea) authArea.innerHTML = `
+        <a href="login.html" class="btn btn-outline-light btn-sm">Đăng nhập</a>
+        <a href="register.html" class="btn btn-warning btn-sm">Đăng ký</a>`;
+      if (loginPrompt) loginPrompt.style.display = 'block';
+      if (ticketGrid) ticketGrid.style.display = 'none';
+      currentUserId = null;
+    } else {
+      const email = localStorage.getItem('userEmail') || '';
+      const fullName = localStorage.getItem('userFullName') || email;
+      if (authArea) authArea.innerHTML = `
+        <span class="text-white-50 small">Xin chào, <strong class="text-white">${fullName}</strong></span>
+        <a href="tickets.html" class="btn btn-outline-light btn-sm">Vé của tôi</a>
+        <button class="btn btn-danger btn-sm" onclick="logout()">Đăng xuất</button>`;
+      if (loginPrompt) loginPrompt.style.display = 'none';
+      if (ticketGrid) ticketGrid.style.display = 'grid';
+      // Get userId from token payload
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        currentUserId = payload.id;
+      } catch(e) { currentUserId = null; }
+    }
+  }
+
+  function logout() {
+    localStorage.clear();
+    location.href = 'login.html';
+  }
+
+  // ===== Load Tickets =====
+  async function loadTickets() {
+    try {
+      const tickets = await apiGet('/market/tickets');
+      renderTickets(tickets);
+    } catch (e) {
+      // 401 → just hide content, don't show error
+      if (e.message && e.message.includes('Unauthorized')) return;
+      showToast('Không thể tải danh sách vé', 'error');
+    }
+  }
+
+  function renderTickets(tickets) {
+    const grid = document.getElementById('ticketGrid');
+    const countBadge = document.getElementById('ticketCount');
+    countBadge.textContent = `${tickets.length} vé`;
+
+    if (!tickets.length) {
+      grid.innerHTML = `
+        <div class="col-12 empty-state">
+          <i class="fas fa-ticket-alt"></i>
+          <h5>Chưa có vé nào được rao bán</h5>
+          <p>Ghé lại sau hoặc đăng vé của bạn tại trang <a href="tickets.html" style="color:#667eea">Vé của tôi</a></p>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = tickets.map(t => {
+      const isMyTicket = t.sellerId === currentUserId;
+      return `
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <div class="market-card">
+          <div class="movie-title"><i class="fas fa-film me-1"></i>${escHtml(t.movieTitle)}</div>
+          <div class="ticket-info"><i class="fas fa-clock"></i>${formatDate(t.showtimeStart)}</div>
+          <div class="ticket-info"><i class="fas fa-door-open"></i>Phòng ${escHtml(t.roomName)}</div>
+          <div class="ticket-info"><i class="fas fa-chair"></i>Ghế: <strong>${escHtml(t.seatCode)}</strong></div>
+          <div class="ticket-info"><i class="fas fa-tag"></i>Giá: <span class="price-tag">${formatPrice(t.price)}</span></div>
+          <div class="ticket-info mt-2">
+            <i class="fas fa-user"></i>
+            <span class="seller-badge"><i class="fas fa-store me-1"></i>${escHtml(t.sellerFullName)}</span>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            ${isMyTicket ? `
+              <button class="btn btn-chat btn-sm flex-fill" onclick="openChat(${t.ticketId}, '${escHtml(t.movieTitle)}')" disabled title="Vé của bạn">
+                <i class="fas fa-comment-dots me-1"></i>Chat
+              </button>
+            ` : `
+              <button class="btn btn-chat btn-sm flex-fill" onclick="openChat(${t.ticketId}, '${escHtml(t.movieTitle)}')">
+                <i class="fas fa-comment-dots me-1"></i>Chat
+              </button>
+              <button class="btn btn-request btn-sm flex-fill" onclick="requestTicket(${t.ticketId})">
+                <i class="fas fa-hand-holding-heart me-1"></i>Nhận vé
+              </button>
+            `}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ===== Request Ticket =====
+  async function requestTicket(ticketId) {
+    if (!getToken()) { showToast('Vui lòng đăng nhập trước', 'error'); return; }
+    try {
+      await apiPost('/market/request', { ticketId });
+      showToast('Yêu cầu đã gửi! Chờ chủ vé duyệt.', 'success');
+    } catch (e) {
+      showToast(e.message || 'Gửi yêu cầu thất bại', 'error');
+    }
+  }
+
+  // ===== Chat =====
+  async function openChat(ticketId, movieTitle) {
+    currentChatTicketId = ticketId;
+    document.getElementById('chatTitle').innerHTML = `<i class="fas fa-comment-dots me-2"></i>${escHtml(movieTitle)}`;
+    document.getElementById('chatMessages').innerHTML = `
+      <div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin"></i><p class="mt-2 mb-0">Đang tải...</p></div>`;
+    document.getElementById('chatOverlay').classList.add('show');
+
+    const isMyTicket = document.querySelector(`.market-card [onclick*="openChat(${ticketId}"]`)?.closest('.market-card')?.querySelector('.btn-request') === null;
+    document.getElementById('btnRequestTicket').style.display = 'none';
+
+    await loadChatHistory(ticketId);
+    if (chatPollInterval) clearInterval(chatPollInterval);
+    chatPollInterval = setInterval(() => loadChatHistory(ticketId, true), 5000);
+  }
+
+  function closeChat() {
+    document.getElementById('chatOverlay').classList.remove('show');
+    currentChatTicketId = null;
+    if (chatPollInterval) { clearInterval(chatPollInterval); chatPollInterval = null; }
+  }
+
+  async function loadChatHistory(ticketId, silent = false) {
+    try {
+      const messages = await apiGet(`/chat/history/${ticketId}`);
+      renderMessages(messages, silent);
+    } catch (e) {
+      if (!silent) showToast('Không thể tải tin nhắn', 'error');
+    }
+  }
+
+  function renderMessages(messages, silent = false) {
+    if (silent && messages.length === lastMessageCount) return;
+    lastMessageCount = messages.length;
+
+    const box = document.getElementById('chatMessages');
+    if (!messages.length) {
+      box.innerHTML = '<div class="text-center text-muted mt-5"><p>Chưa có tin nhắn nào.<br>Hãy là người đầu tiên nhắn!</p></div>';
+      return;
+    }
+
+    box.innerHTML = messages.map(m => {
+      const isMe = m.senderId === currentUserId;
+      return `
+      <div class="chat-msg ${isMe ? 'me' : 'other'}">
+        ${!isMe ? `<div class="chat-msg-sender">${escHtml(m.senderFullName)}</div>` : ''}
+        <div>${escHtml(m.content)}</div>
+        <div class="chat-msg-time">${formatTime(m.createdAt)}</div>
+      </div>`;
+    }).join('');
+
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function sendChat() {
+    const input = document.getElementById('chatInput');
+    const content = input.value.trim();
+    if (!content) return;
+    if (!getToken()) { showToast('Vui lòng đăng nhập', 'error'); return; }
+    input.value = '';
+    try {
+      await apiPost('/chat/send', { ticketId: currentChatTicketId, content });
+      await loadChatHistory(currentChatTicketId, true);
+    } catch (e) {
+      showToast(e.message || 'Gửi tin nhắn thất bại', 'error');
+      input.value = content;
+    }
+  }
+
+  // ===== Helpers =====
+  function escHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleString('vi-VN', {
+      day:'2-digit', month:'2-digit', year:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    });
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
+  }
+
+  function formatPrice(p) {
+    if (!p) return '0đ';
+    return Number(p).toLocaleString('vi-VN') + 'đ';
+  }
+
+  function showToast(msg, type = 'info') {
+    const box = document.getElementById('toastBox');
+    const t = document.createElement('div');
+    t.className = `toast-msg ${type}`;
+    t.textContent = msg;
+    box.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  // Close overlay when clicking outside
+  document.getElementById('chatOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeChat();
+  });
+
+  // Make functions global
+  window.closeChat = closeChat;
+  window.sendChat = sendChat;
+  window.requestTicket = requestTicket;
+  window.openChat = openChat;
+
+  init();
+</script>
+</body>
+</html>
