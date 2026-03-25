@@ -1,6 +1,5 @@
 package com.datvexemphim.api.dto.market;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
 public record TicketMarketDTO(
@@ -9,7 +8,7 @@ public record TicketMarketDTO(
         Instant showtimeStart,
         String roomName,
         String seatCode,
-        BigDecimal price,
+        Long price,
         String sellerFullName,
         Long sellerId,
         String ticketStatus,
