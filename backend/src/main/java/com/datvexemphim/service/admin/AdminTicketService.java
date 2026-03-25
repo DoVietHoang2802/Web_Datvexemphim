@@ -14,13 +14,13 @@ import com.datvexemphim.domain.repository.TicketRepository;
 import com.datvexemphim.domain.repository.UserRepository;
 import com.datvexemphim.domain.repository.FoodOrderRepository;
 import com.datvexemphim.domain.repository.TransferHistoryRepository;
+import com.datvexemphim.domain.repository.TicketRequestRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.List;
 
 @Service
@@ -31,19 +31,22 @@ public class AdminTicketService {
     private final UserRepository userRepository;
     private final FoodOrderRepository foodOrderRepository;
     private final TransferHistoryRepository transferHistoryRepository;
+    private final TicketRequestRepository ticketRequestRepository;
 
     public AdminTicketService(TicketRepository ticketRepository,
                               ShowtimeRepository showtimeRepository,
                               SeatRepository seatRepository,
                               UserRepository userRepository,
                               FoodOrderRepository foodOrderRepository,
-                              TransferHistoryRepository transferHistoryRepository) {
+                              TransferHistoryRepository transferHistoryRepository,
+                              TicketRequestRepository ticketRequestRepository) {
         this.ticketRepository = ticketRepository;
         this.showtimeRepository = showtimeRepository;
         this.seatRepository = seatRepository;
         this.userRepository = userRepository;
         this.foodOrderRepository = foodOrderRepository;
         this.transferHistoryRepository = transferHistoryRepository;
+        this.ticketRequestRepository = ticketRequestRepository;
     }
 
     @Transactional
@@ -132,14 +135,22 @@ public class AdminTicketService {
         Ticket t = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found"));
 
-        // GIẢI PHÓNG GHẾ
+        // 1. GIẢI PHÓNG GHẾ
         Seat seat = t.getSeat();
         if (seat != null) {
             seat.setActive(true);
             seatRepository.save(seat);
         }
 
-        // Delete transfer history records linked to this ticket
+        // 2. Xóa ticket request trước (quan trọng - tránh 409 conflict)
+        try {
+            ticketRequestRepository.deleteByTicketId(id);
+            ticketRequestRepository.flush();
+        } catch (Exception ex) {
+            System.err.println("Failed to delete ticket requests for ticket " + id + ": " + ex.getMessage());
+        }
+
+        // 3. Delete transfer history records linked to this ticket
         try {
             List<com.datvexemphim.domain.entity.TransferHistory> transfers = transferHistoryRepository.findByTicketId(id);
             if (!transfers.isEmpty()) {
@@ -150,7 +161,7 @@ public class AdminTicketService {
             System.err.println("Failed to delete transfer history for ticket " + id + ": " + ex.getMessage());
         }
 
-        // Delete food orders linked to this ticket
+        // 4. Delete food orders linked to this ticket
         try {
             List<FoodOrder> foodOrders = foodOrderRepository.findAll().stream()
                     .filter(fo -> fo.getTicket() != null && fo.getTicket().getId().equals(id))
@@ -163,11 +174,18 @@ public class AdminTicketService {
             System.err.println("Failed to delete food orders for ticket " + id + ": " + ex.getMessage());
         }
 
-        // Detach payment before deleting
+        // 5. Detach payment before deleting
         if (t.getPayment() != null) {
             t.setPayment(null);
             ticketRepository.save(t);
             ticketRepository.flush();
+        }
+
+        // 6. Xóa chat messages
+        try {
+            ticketRepository.flush();
+        } catch (Exception ex) {
+            System.err.println("Flush before ticket delete: " + ex.getMessage());
         }
 
         ticketRepository.delete(t);
@@ -193,4 +211,3 @@ public class AdminTicketService {
         ticketRepository.save(t);
     }
 }
-
