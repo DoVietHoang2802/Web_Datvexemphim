@@ -39,3 +39,4 @@ vnpay:
 logging:
   level:
     org.hibernate.SQL: warn
+    com.datvexemphim: info
