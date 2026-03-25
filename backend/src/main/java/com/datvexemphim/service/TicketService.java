@@ -128,12 +128,14 @@ public class TicketService {
             if (seat != null) {
                 seat.setActive(true);
                 seatRepository.save(seat);
+                seatRepository.flush();
             }
         }
 
         t.setStatus(TicketStatus.CANCELLED);
         t.setCancelledAt(Instant.now());
         ticketRepository.save(t);
+        ticketRepository.flush();
     }
 
     @Transactional

@@ -72,6 +72,11 @@ public class PaymentService {
             for (Ticket t : tickets) {
                 t.setStatus(TicketStatus.CONFIRMED);
                 t.setPayment(payment);
+                // ĐÁNH DẤU GHẾ LÀ ĐÃ ĐẶT
+                if (t.getSeat() != null) {
+                    t.getSeat().setActive(false);
+                    seatRepository.save(t.getSeat());
+                }
             }
             ticketRepository.saveAll(tickets);
 
