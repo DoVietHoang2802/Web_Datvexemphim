@@ -86,4 +86,11 @@ public class TicketMarketController {
         marketService.respondToRequest(req.requestId(), req.accept(), me);
         return ResponseEntity.ok().build();
     }
+
+    /** Số thông báo (yêu cầu chờ duyệt) */
+    @GetMapping("/notifications")
+    public ResponseEntity<TicketMarketService.NotificationCounts> getNotifications() {
+        Long userId = currentUserService.requireUser().getId();
+        return ResponseEntity.ok(marketService.getNotificationCounts(userId));
+    }
 }

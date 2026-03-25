@@ -11,8 +11,8 @@
     body { background: #0f0f23; color: #fff; min-height: 100vh; }
     .page-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 2rem 0;
-      margin-bottom: 2rem;
+      padding: 1.5rem 0;
+      margin-bottom: 1.5rem;
       border-radius: 0 0 1rem 1rem;
     }
     .market-card {
@@ -34,17 +34,9 @@
       color: #667eea;
       margin-bottom: 0.75rem;
     }
-    .ticket-info {
-      font-size: 0.9rem;
-      color: #aaa;
-      margin-bottom: 0.3rem;
-    }
+    .ticket-info { font-size: 0.9rem; color: #aaa; margin-bottom: 0.3rem; }
     .ticket-info i { width: 20px; color: #764ba2; }
-    .price-tag {
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #f59e0b;
-    }
+    .price-tag { font-size: 1.3rem; font-weight: 700; color: #f59e0b; }
     .seller-badge {
       background: rgba(102,126,234,.2);
       color: #a5b4fc;
@@ -52,170 +44,243 @@
       border-radius: 20px;
       font-size: 0.8rem;
     }
-    .empty-state {
-      text-align: center;
-      padding: 4rem 2rem;
-      color: #666;
-    }
+    .empty-state { text-align: center; padding: 4rem 2rem; color: #666; }
     .empty-state i { font-size: 4rem; margin-bottom: 1rem; }
     .btn-market {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      transition: all 0.3s;
+      color: #fff; border: none; padding: 0.5rem 1rem;
+      border-radius: 0.5rem; font-weight: 600; transition: all 0.3s;
     }
     .btn-market:hover { opacity: 0.85; color: #fff; transform: scale(1.02); }
-    .btn-chat {
-      background: transparent;
-      border: 1px solid #667eea;
-      color: #a5b4fc;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      transition: all 0.3s;
+    .btn-request {
+      background: #22c55e; color: #fff; border: none; padding: 0.5rem 1rem;
+      border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem; transition: all 0.3s;
     }
-    .btn-chat:hover { background: rgba(102,126,234,.2); color: #fff; }
-    /* ===== Chat Modal ===== */
-    .chat-modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.6);
-      z-index: 9998;
-      align-items: center;
-      justify-content: center;
+    .btn-request:hover { background: #16a34a; color: #fff; }
+    .btn-request:disabled { background: #555; color: #999; cursor: not-allowed; }
+    .btn-pending {
+      background: #f59e0b; color: #fff; border: none; padding: 0.5rem 1rem;
+      border-radius: 0.5rem; font-weight: 600; font-size: 0.85rem;
     }
-    .chat-modal-overlay.show { display: flex; }
-    .chat-modal-box {
-      background: #1a1a2e;
-      border: 1px solid #333;
-      border-radius: 1rem;
-      width: 420px;
-      max-width: 95vw;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    /* ===== Modal ===== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); z-index: 9998;
+      align-items: center; justify-content: center;
     }
-    .chat-modal-header {
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+      background: #1a1a2e; border: 1px solid #333; border-radius: 1rem;
+      width: 460px; max-width: 95vw; max-height: 85vh;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .modal-header {
       padding: 1rem;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .chat-modal-header h6 { margin: 0; font-size: 0.95rem; }
+    .modal-header h6 { margin: 0; font-size: 0.95rem; }
+    /* ===== Chat ===== */
     .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      min-height: 300px;
+      flex: 1; overflow-y: auto; padding: 1rem;
+      display: flex; flex-direction: column; gap: 0.5rem; min-height: 280px; max-height: 400px;
     }
     .chat-msg {
-      max-width: 75%;
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.75rem;
-      font-size: 0.88rem;
-      line-height: 1.4;
+      max-width: 78%; padding: 0.5rem 0.75rem;
+      border-radius: 0.75rem; font-size: 0.88rem; line-height: 1.4;
     }
-    .chat-msg.me {
-      background: #667eea;
-      color: #fff;
-      align-self: flex-end;
-      border-bottom-right-radius: 0.25rem;
-    }
-    .chat-msg.other {
-      background: #2d2d44;
-      color: #ddd;
-      align-self: flex-start;
-      border-bottom-left-radius: 0.25rem;
-    }
-    .chat-msg-sender {
-      font-size: 0.72rem;
-      color: #888;
-      margin-bottom: 0.15rem;
-    }
-    .chat-msg-time {
-      font-size: 0.68rem;
-      color: rgba(255,255,255,.4);
-      text-align: right;
-      margin-top: 0.15rem;
-    }
+    .chat-msg.me { background: #667eea; color: #fff; align-self: flex-end; border-bottom-right-radius: 0.25rem; }
+    .chat-msg.other { background: #2d2d44; color: #ddd; align-self: flex-start; border-bottom-left-radius: 0.25rem; }
+    .chat-msg-sender { font-size: 0.72rem; color: #888; margin-bottom: 0.15rem; }
+    .chat-msg-time { font-size: 0.68rem; color: rgba(255,255,255,.4); text-align: right; margin-top: 0.15rem; }
     .chat-input-area {
-      padding: 0.75rem;
-      border-top: 1px solid #333;
-      display: flex;
-      gap: 0.5rem;
+      padding: 0.75rem; border-top: 1px solid #333;
+      display: flex; gap: 0.5rem;
     }
     .chat-input-area input {
-      flex: 1;
-      background: #2d2d44;
-      border: 1px solid #444;
-      color: #fff;
-      border-radius: 0.5rem;
-      padding: 0.5rem 0.75rem;
-      font-size: 0.88rem;
+      flex: 1; background: #2d2d44; border: 1px solid #444; color: #fff;
+      border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.88rem;
     }
     .chat-input-area input:focus { outline: none; border-color: #667eea; }
+    /* ===== Community Chat ===== */
+    .community-widget {
+      position: fixed; bottom: 20px; right: 20px; z-index: 9997;
+    }
+    .community-btn {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff; border: none; font-size: 24px;
+      cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s; position: relative;
+    }
+    .community-btn:hover { transform: scale(1.1); }
+    .community-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: #ef4444; color: #fff;
+      border-radius: 50%; width: 20px; height: 20px;
+      font-size: 0.7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #0f0f23;
+    }
+    .community-panel {
+      position: absolute; bottom: 75px; right: 0;
+      width: 360px; max-width: 90vw;
+      background: #1a1a2e; border: 1px solid #333;
+      border-radius: 1rem; overflow: hidden;
+      display: none; flex-direction: column;
+      max-height: 500px;
+      box-shadow: 0 5px 30px rgba(0,0,0,.3);
+    }
+    .community-panel.show { display: flex; }
+    .community-header {
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .community-header h6 { margin: 0; font-size: 0.9rem; }
+    .community-msgs {
+      flex: 1; overflow-y: auto; padding: 0.75rem;
+      display: flex; flex-direction: column; gap: 0.4rem; min-height: 200px; max-height: 320px;
+    }
+    .community-msg {
+      max-width: 80%; padding: 0.35rem 0.6rem;
+      border-radius: 0.5rem; font-size: 0.82rem; line-height: 1.3;
+    }
+    .community-msg.me { background: #667eea; color: #fff; align-self: flex-end; }
+    .community-msg.other { background: #2d2d44; color: #ddd; align-self: flex-start; }
+    .community-msg-sender { font-size: 0.68rem; color: #888; margin-bottom: 0.1rem; }
+    .community-input {
+      padding: 0.6rem; border-top: 1px solid #333;
+      display: flex; gap: 0.4rem;
+    }
+    .community-input input {
+      flex: 1; background: #2d2d44; border: 1px solid #444; color: #fff;
+      border-radius: 0.4rem; padding: 0.4rem 0.6rem; font-size: 0.82rem;
+    }
+    .community-input input:focus { outline: none; border-color: #f59e0b; }
+    /* ===== Notification Panel ===== */
+    .notif-widget {
+      position: fixed; top: 80px; right: 20px; z-index: 9996;
+    }
+    .notif-btn {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: #1a1a2e; border: 1px solid #333;
+      color: #fff; font-size: 20px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; transition: all 0.3s;
+    }
+    .notif-btn:hover { background: #2d2d44; border-color: #667eea; }
+    .notif-badge {
+      position: absolute; top: -4px; right: -4px;
+      background: #ef4444; color: #fff;
+      border-radius: 50%; width: 20px; height: 20px;
+      font-size: 0.7rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #0f0f23;
+    }
+    .notif-panel {
+      position: absolute; top: 58px; right: 0;
+      width: 380px; max-width: 90vw;
+      background: #1a1a2e; border: 1px solid #333;
+      border-radius: 0.75rem; overflow: hidden;
+      display: none; max-height: 500px; overflow-y: auto;
+      box-shadow: 0 5px 30px rgba(0,0,0,.3);
+    }
+    .notif-panel.show { display: block; }
+    .notif-header {
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      font-size: 0.9rem; font-weight: 600;
+    }
+    .notif-item {
+      padding: 0.75rem 1rem; border-bottom: 1px solid #2d2d44;
+      display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-info { flex: 1; }
+    .notif-info .name { font-weight: 600; font-size: 0.88rem; color: #fff; }
+    .notif-info .movie { font-size: 0.78rem; color: #aaa; margin-top: 0.15rem; }
+    .notif-actions { display: flex; gap: 0.3rem; }
+    .btn-accept { background: #22c55e; color: #fff; border: none; padding: 0.3rem 0.6rem; border-radius: 0.4rem; font-size: 0.78rem; cursor: pointer; }
+    .btn-accept:hover { background: #16a34a; }
+    .btn-reject { background: #ef4444; color: #fff; border: none; padding: 0.3rem 0.6rem; border-radius: 0.4rem; font-size: 0.78rem; cursor: pointer; }
+    .btn-reject:hover { background: #dc2626; }
+    .empty-notif { padding: 2rem; text-align: center; color: #666; font-size: 0.85rem; }
+    /* ===== Toast ===== */
     .toast-box {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem;
     }
     .toast-msg {
-      padding: 0.75rem 1.25rem;
-      border-radius: 0.5rem;
-      color: #fff;
-      font-size: 0.88rem;
-      animation: slideIn 0.3s ease;
+      padding: 0.75rem 1.25rem; border-radius: 0.5rem;
+      color: #fff; font-size: 0.88rem; white-space: nowrap;
+      animation: slideUp 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,.3);
     }
     .toast-msg.success { background: #22c55e; }
     .toast-msg.error { background: #ef4444; }
     .toast-msg.info { background: #667eea; }
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
-    .loading-spinner {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 3rem;
+    .loading-spinner { display: flex; justify-content: center; align-items: center; padding: 3rem; }
+    .login-prompt { text-align: center; padding: 3rem; background: #1a1a2e; border-radius: 1rem; border: 1px solid #333; }
+    .request-status { font-size: 0.75rem; padding: 0.3rem 0.6rem; border-radius: 0.4rem; }
+    .request-status.pending { background: rgba(245,158,11,.2); color: #fcd34d; }
+    .request-status.accepted { background: rgba(34,197,94,.2); color: #6ee7b7; }
+    .request-status.rejected { background: rgba(239,68,68,.2); color: #fca5a5; }
+    .tab-section { margin-bottom: 1.5rem; }
+    .tab-section .nav-tabs { border: none; gap: 0.5rem; }
+    .tab-section .nav-tabs .nav-link {
+      background: rgba(255,255,255,.05); border: 1px solid #333;
+      color: #aaa; border-radius: 0.5rem; padding: 0.5rem 1rem;
+      font-size: 0.88rem; transition: all 0.2s;
     }
-    .btn-request {
-      background: #22c55e;
-      color: #fff;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 0.5rem;
-      font-weight: 600;
-      transition: all 0.3s;
-      font-size: 0.88rem;
+    .tab-section .nav-tabs .nav-link.active {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-color: transparent; color: #fff;
     }
-    .btn-request:hover { background: #16a34a; color: #fff; }
-    .btn-request:disabled { background: #555; cursor: not-allowed; }
-    .login-prompt {
-      text-align: center;
-      padding: 3rem;
-      background: #1a1a2e;
-      border-radius: 1rem;
-      border: 1px solid #333;
-    }
+    .tab-section .nav-tabs .nav-link:hover { border-color: #667eea; color: #fff; }
   </style>
 </head>
 <body>
 
 <!-- Navbar -->
 <div id="navbarContainer"></div>
+
+<!-- Notification Button (chỉ khi login) -->
+<div class="notif-widget" id="notifWidget" style="display:none;">
+  <button class="notif-btn" onclick="toggleNotifPanel()">
+    <i class="fas fa-bell"></i>
+    <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+  </button>
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-header"><i class="fas fa-hand-holding-heart me-2"></i>Yêu cầu nhận vé</div>
+    <div id="notifList"><div class="empty-notif"><i class="fas fa-bell-slash mb-2" style="font-size:2rem;"></i><br>Không có yêu cầu nào</div></div>
+  </div>
+</div>
+
+<!-- Community Chat Widget -->
+<div class="community-widget" id="communityWidget" style="display:none;">
+  <button class="community-btn" onclick="toggleCommunity()">
+    <i class="fas fa-users"></i>
+    <span class="community-badge" id="communityBadge" style="display:none;">0</span>
+  </button>
+  <div class="community-panel" id="communityPanel">
+    <div class="community-header">
+      <h6><i class="fas fa-users me-2"></i>Cộng đồng DATVEXEMPHIM</h6>
+      <button class="btn btn-sm btn-outline-light" onclick="toggleCommunity()">&times;</button>
+    </div>
+    <div class="community-msgs" id="communityMsgs">
+      <div class="text-center text-muted mt-4"><i class="fas fa-spinner fa-spin"></i></div>
+    </div>
+    <div class="community-input">
+      <input type="text" id="communityInput" placeholder="Nhắn cộng đồng..." onkeydown="if(event.key==='Enter')sendCommunity()">
+      <button class="btn btn-sm" style="background:#f59e0b;color:#fff;" onclick="sendCommunity()"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
 
 <!-- Page Header -->
 <div class="page-header">
@@ -234,7 +299,6 @@
 
 <!-- Main Content -->
 <div class="container mb-5">
-  <!-- Login prompt (hidden if logged in) -->
   <div id="loginPrompt" class="login-prompt" style="display:none;">
     <i class="fas fa-lock mb-3" style="font-size:3rem;color:#667eea;"></i>
     <h4>Vui lòng đăng nhập</h4>
@@ -244,32 +308,22 @@
 
   <!-- Ticket Grid -->
   <div id="ticketGrid" class="row g-3">
-    <div class="loading-spinner col-12">
-      <div class="spinner-border text-primary" role="status"></div>
-    </div>
+    <div class="loading-spinner col-12"><div class="spinner-border text-primary"></div></div>
   </div>
 </div>
 
-<!-- Toast Container -->
+<!-- Toast -->
 <div class="toast-box" id="toastBox"></div>
 
-<!-- Chat Modal -->
-<div class="chat-modal-overlay" id="chatOverlay">
-  <div class="chat-modal-box">
-    <div class="chat-modal-header">
+<!-- Modal Overlay (chat) -->
+<div class="modal-overlay" id="chatOverlay">
+  <div class="modal-box">
+    <div class="modal-header">
       <h6 id="chatTitle"><i class="fas fa-comments me-2"></i>Tin nhắn</h6>
-      <div>
-        <button class="btn btn-sm btn-light me-1" id="btnRequestTicket" style="display:none;">
-          <i class="fas fa-hand-holding-heart me-1"></i>Nhận vé
-        </button>
-        <button class="btn btn-sm btn-outline-light" onclick="closeChat()">&times;</button>
-      </div>
+      <button class="btn btn-sm btn-outline-light" onclick="closeChat()">&times;</button>
     </div>
     <div class="chat-messages" id="chatMessages">
-      <div class="text-center text-muted mt-5">
-        <i class="fas fa-spinner fa-spin"></i>
-        <p class="mt-2 mb-0">Đang tải tin nhắn...</p>
-      </div>
+      <div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin"></i><p class="mt-2 mb-0">Đang tải...</p></div>
     </div>
     <div class="chat-input-area">
       <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." onkeydown="if(event.key==='Enter')sendChat()">
@@ -278,7 +332,6 @@
   </div>
 </div>
 
-<!-- Bootstrap & API -->
 <script src="/assets/js/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script type="module">
@@ -288,14 +341,19 @@
   let currentUserId = null;
   let currentChatTicketId = null;
   let chatPollInterval = null;
-  let lastMessageCount = 0;
+  let lastChatCount = 0;
+  let communityPollInterval = null;
+  let lastCommunityCount = 0;
+  let myRequestedTicketIds = new Set();
+  let pendingRequests = [];
 
   // ===== Init =====
   async function init() {
     await loadNavbar();
     await loadTickets();
-    // Refresh every 10s
     setInterval(loadTickets, 10000);
+    setInterval(checkNotifications, 8000);
+    setInterval(loadCommunityMessages, 5000);
   }
 
   async function loadNavbar() {
@@ -310,6 +368,8 @@
     const authArea = document.getElementById('authArea');
     const loginPrompt = document.getElementById('loginPrompt');
     const ticketGrid = document.getElementById('ticketGrid');
+    const notifWidget = document.getElementById('notifWidget');
+    const communityWidget = document.getElementById('communityWidget');
 
     if (!token) {
       if (authArea) authArea.innerHTML = `
@@ -317,6 +377,8 @@
         <a href="register.html" class="btn btn-warning btn-sm">Đăng ký</a>`;
       if (loginPrompt) loginPrompt.style.display = 'block';
       if (ticketGrid) ticketGrid.style.display = 'none';
+      if (notifWidget) notifWidget.style.display = 'none';
+      if (communityWidget) communityWidget.style.display = 'none';
       currentUserId = null;
     } else {
       const email = localStorage.getItem('userEmail') || '';
@@ -327,7 +389,8 @@
         <button class="btn btn-danger btn-sm" onclick="logout()">Đăng xuất</button>`;
       if (loginPrompt) loginPrompt.style.display = 'none';
       if (ticketGrid) ticketGrid.style.display = 'grid';
-      // Get userId from token payload
+      if (notifWidget) notifWidget.style.display = 'block';
+      if (communityWidget) communityWidget.style.display = 'block';
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         currentUserId = payload.id;
@@ -346,9 +409,8 @@
       const tickets = await apiGet('/market/tickets');
       renderTickets(tickets);
     } catch (e) {
-      // 401 → just hide content, don't show error
       if (e.message && e.message.includes('Unauthorized')) return;
-      showToast('Không thể tải danh sách vé', 'error');
+      console.error(e);
     }
   }
 
@@ -358,17 +420,15 @@
     countBadge.textContent = `${tickets.length} vé`;
 
     if (!tickets.length) {
-      grid.innerHTML = `
-        <div class="col-12 empty-state">
-          <i class="fas fa-ticket-alt"></i>
-          <h5>Chưa có vé nào được rao bán</h5>
-          <p>Ghé lại sau hoặc đăng vé của bạn tại trang <a href="tickets.html" style="color:#667eea">Vé của tôi</a></p>
-        </div>`;
+      grid.innerHTML = `<div class="col-12 empty-state"><i class="fas fa-ticket-alt"></i><h5>Chưa có vé nào được rao bán</h5><p>Đăng vé tại <a href="tickets.html" style="color:#667eea">Vé của tôi</a></p></div>`;
       return;
     }
 
     grid.innerHTML = tickets.map(t => {
       const isMyTicket = t.sellerId === currentUserId;
+      const hasRequested = myRequestedTicketIds.has(t.ticketId);
+      const pendingReq = pendingRequests.find(r => r.ticketId === t.ticketId);
+
       return `
       <div class="col-12 col-sm-6 col-md-4 col-lg-3">
         <div class="market-card">
@@ -381,33 +441,155 @@
             <i class="fas fa-user"></i>
             <span class="seller-badge"><i class="fas fa-store me-1"></i>${escHtml(t.sellerFullName)}</span>
           </div>
+          ${isMyTicket ? `
+            <div class="alert alert-warning py-1 px-2 mt-2 mb-0 text-center" style="font-size:0.78rem; border-radius:0.4rem;">
+              <i class="fas fa-store me-1"></i>Vé của bạn đang bán
+            </div>
+          ` : `
           <div class="d-flex gap-2 mt-3">
-            ${isMyTicket ? `
-              <button class="btn btn-chat btn-sm flex-fill" onclick="openChat(${t.ticketId}, '${escHtml(t.movieTitle)}')" disabled title="Vé của bạn">
-                <i class="fas fa-comment-dots me-1"></i>Chat
+            <button class="btn btn-sm flex-fill" style="background:transparent;border:1px solid #667eea;color:#a5b4fc;" onclick="openChat(${t.ticketId}, '${escHtml(t.movieTitle)}')">
+              <i class="fas fa-comment-dots me-1"></i>Chat
+            </button>
+            ${hasRequested || pendingReq ? `
+              <button class="btn btn-sm flex-fill btn-pending" disabled>
+                <i class="fas fa-clock me-1"></i>Đã gửi
               </button>
             ` : `
-              <button class="btn btn-chat btn-sm flex-fill" onclick="openChat(${t.ticketId}, '${escHtml(t.movieTitle)}')">
-                <i class="fas fa-comment-dots me-1"></i>Chat
-              </button>
-              <button class="btn btn-request btn-sm flex-fill" onclick="requestTicket(${t.ticketId})">
+              <button class="btn btn-sm flex-fill btn-request" onclick="requestTicket(${t.ticketId}, this)">
                 <i class="fas fa-hand-holding-heart me-1"></i>Nhận vé
               </button>
             `}
           </div>
+          `}
         </div>
       </div>`;
     }).join('');
   }
 
+  // ===== Notifications =====
+  async function checkNotifications() {
+    if (!getToken()) return;
+    try {
+      const [counts, myReqs, myListed] = await Promise.all([
+        apiGet('/market/notifications'),
+        apiGet('/market/my-requests'),
+        apiGet('/market/my-listed')
+      ]);
+
+      // Cập nhật myRequestedTicketIds
+      myRequestedTicketIds = new Set(myReqs.map(r => r.ticketId));
+      pendingRequests = myReqs.filter(r => r.status === 'PENDING');
+
+      // Cập nhật badge
+      const totalNotif = counts.incomingRequests + counts.myRequests;
+      const badge = document.getElementById('notifBadge');
+      if (badge) {
+        if (totalNotif > 0) {
+          badge.textContent = totalNotif > 9 ? '9+' : totalNotif;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+        }
+      }
+
+      // Hiển thị notification panel nếu đang mở
+      renderNotifPanel(myReqs, myListed);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  function renderNotifPanel(myReqs, myListed) {
+    const panel = document.getElementById('notifPanel');
+    if (!panel || !panel.classList.contains('show')) return;
+
+    const list = document.getElementById('notifList');
+    if (!list) return;
+
+    // Lấy tất cả request chờ trên vé của mình
+    Promise.all(myListed.map(t => apiGet(`/market/requests/${t.ticketId}`)))
+      .then(results => {
+        const allRequests = results.flat();
+        const incoming = allRequests.filter(r => r.status === 'PENDING');
+
+        if (!incoming.length && !myReqs.length) {
+          list.innerHTML = `<div class="empty-notif"><i class="fas fa-bell-slash mb-2" style="font-size:2rem;"></i><br>Không có yêu cầu nào</div>`;
+          return;
+        }
+
+        let html = '';
+
+        // Yêu cầu trên vé của mình
+        if (incoming.length) {
+          html += `<div class="notif-header" style="background:linear-gradient(135deg,#22c55e,#16a34a);"><i class="fas fa-arrow-down me-2"></i>Người mua muốn nhận vé của bạn (${incoming.length})</div>`;
+          incoming.forEach(r => {
+            html += `
+            <div class="notif-item">
+              <div class="notif-info">
+                <div class="name"><i class="fas fa-user me-1"></i>${escHtml(r.requesterFullName)}</div>
+                <div class="movie"><i class="fas fa-film me-1"></i>${escHtml(r.movieTitle)} | Ghế ${escHtml(r.seatCode)}</div>
+                <div class="movie"><i class="fas fa-clock me-1"></i>${formatDate(r.showtimeStart)}</div>
+              </div>
+              <div class="notif-actions">
+                <button class="btn-accept" onclick="respondRequest(${r.id}, true)"><i class="fas fa-check"></i></button>
+                <button class="btn-reject" onclick="respondRequest(${r.id}, false)"><i class="fas fa-times"></i></button>
+              </div>
+            </div>`;
+          });
+        }
+
+        // Yêu cầu của mình đã gửi
+        const myPending = myReqs.filter(r => r.status === 'PENDING');
+        if (myPending.length) {
+          html += `<div class="notif-header"><i class="fas fa-clock me-2"></i>Yêu cầu của bạn (chờ duyệt)</div>`;
+          myPending.forEach(r => {
+            html += `
+            <div class="notif-item">
+              <div class="notif-info">
+                <div class="name"><i class="fas fa-film me-1"></i>${escHtml(r.movieTitle)}</div>
+                <div class="movie"><i class="fas fa-clock me-1"></i>${formatDate(r.showtimeStart)} | Ghế ${escHtml(r.seatCode)}</div>
+                <span class="request-status pending mt-1"><i class="fas fa-hourglass-half me-1"></i>Chờ duyệt</span>
+              </div>
+            </div>`;
+          });
+        }
+
+        list.innerHTML = html;
+      })
+      .catch(() => {});
+  }
+
+  function toggleNotifPanel() {
+    const panel = document.getElementById('notifPanel');
+    panel.classList.toggle('show');
+    if (panel.classList.contains('show')) {
+      checkNotifications();
+    }
+  }
+
+  async function respondRequest(requestId, accept) {
+    try {
+      await apiPost('/market/respond', { requestId, accept });
+      showToast(accept ? 'Đã đồng ý chuyển vé!' : 'Đã từ chối yêu cầu.', accept ? 'success' : 'info');
+      await checkNotifications();
+      await loadTickets();
+    } catch (e) {
+      showToast(e.message || 'Thao tác thất bại', 'error');
+    }
+  }
+
   // ===== Request Ticket =====
-  async function requestTicket(ticketId) {
-    if (!getToken()) { showToast('Vui lòng đăng nhập trước', 'error'); return; }
+  async function requestTicket(ticketId, btn) {
+    if (!getToken()) { showToast('Vui lòng đăng nhập', 'error'); return; }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Đang gửi...'; }
     try {
       await apiPost('/market/request', { ticketId });
       showToast('Yêu cầu đã gửi! Chờ chủ vé duyệt.', 'success');
+      await checkNotifications();
+      await loadTickets();
     } catch (e) {
       showToast(e.message || 'Gửi yêu cầu thất bại', 'error');
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-hand-holding-heart me-1"></i>Nhận vé'; }
     }
   }
 
@@ -415,13 +597,8 @@
   async function openChat(ticketId, movieTitle) {
     currentChatTicketId = ticketId;
     document.getElementById('chatTitle').innerHTML = `<i class="fas fa-comment-dots me-2"></i>${escHtml(movieTitle)}`;
-    document.getElementById('chatMessages').innerHTML = `
-      <div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin"></i><p class="mt-2 mb-0">Đang tải...</p></div>`;
+    document.getElementById('chatMessages').innerHTML = `<div class="text-center text-muted mt-5"><i class="fas fa-spinner fa-spin"></i><p class="mt-2 mb-0">Đang tải...</p></div>`;
     document.getElementById('chatOverlay').classList.add('show');
-
-    const isMyTicket = document.querySelector(`.market-card [onclick*="openChat(${ticketId}"]`)?.closest('.market-card')?.querySelector('.btn-request') === null;
-    document.getElementById('btnRequestTicket').style.display = 'none';
-
     await loadChatHistory(ticketId);
     if (chatPollInterval) clearInterval(chatPollInterval);
     chatPollInterval = setInterval(() => loadChatHistory(ticketId, true), 5000);
@@ -436,32 +613,28 @@
   async function loadChatHistory(ticketId, silent = false) {
     try {
       const messages = await apiGet(`/chat/history/${ticketId}`);
-      renderMessages(messages, silent);
+      renderChatMessages(messages, silent);
     } catch (e) {
       if (!silent) showToast('Không thể tải tin nhắn', 'error');
     }
   }
 
-  function renderMessages(messages, silent = false) {
-    if (silent && messages.length === lastMessageCount) return;
-    lastMessageCount = messages.length;
-
+  function renderChatMessages(messages, silent = false) {
+    if (silent && messages.length === lastChatCount) return;
+    lastChatCount = messages.length;
     const box = document.getElementById('chatMessages');
     if (!messages.length) {
-      box.innerHTML = '<div class="text-center text-muted mt-5"><p>Chưa có tin nhắn nào.<br>Hãy là người đầu tiên nhắn!</p></div>';
+      box.innerHTML = '<div class="text-center text-muted mt-5"><p>Chưa có tin nhắn.<br>Hãy nhắn để trao đổi!</p></div>';
       return;
     }
-
     box.innerHTML = messages.map(m => {
       const isMe = m.senderId === currentUserId;
-      return `
-      <div class="chat-msg ${isMe ? 'me' : 'other'}">
+      return `<div class="chat-msg ${isMe ? 'me' : 'other'}">
         ${!isMe ? `<div class="chat-msg-sender">${escHtml(m.senderFullName)}</div>` : ''}
         <div>${escHtml(m.content)}</div>
         <div class="chat-msg-time">${formatTime(m.createdAt)}</div>
       </div>`;
     }).join('');
-
     box.scrollTop = box.scrollHeight;
   }
 
@@ -480,6 +653,72 @@
     }
   }
 
+  // ===== Community Chat =====
+  function toggleCommunity() {
+    const panel = document.getElementById('communityPanel');
+    panel.classList.toggle('show');
+    if (panel.classList.contains('show')) {
+      loadCommunityMessages();
+    }
+  }
+
+  async function loadCommunityMessages() {
+    try {
+      const messages = await apiGet('/community/messages');
+      renderCommunityMessages(messages);
+    } catch (e) {}
+  }
+
+  function renderCommunityMessages(messages) {
+    const box = document.getElementById('communityMsgs');
+    if (!box) return;
+
+    const isOpen = document.getElementById('communityPanel')?.classList.contains('show');
+
+    if (!messages.length) {
+      if (isOpen) box.innerHTML = '<div class="text-center text-muted mt-4"><p>Chưa có tin nhắn nào.<br>Hãy là người đầu tiên!</p></div>';
+      return;
+    }
+
+    const hasNew = messages.length > lastCommunityCount;
+    lastCommunityCount = messages.length;
+
+    if (isOpen) {
+      box.innerHTML = messages.map(m => {
+        const isMe = m.senderId === currentUserId;
+        return `<div class="community-msg ${isMe ? 'me' : 'other'}">
+          ${!isMe ? `<div class="community-msg-sender">${escHtml(m.senderFullName)}</div>` : ''}
+          <div>${escHtml(m.content)}</div>
+        </div>`;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // Badge
+    const badge = document.getElementById('communityBadge');
+    if (badge) {
+      if (hasNew && !isOpen) {
+        badge.textContent = messages.length > 99 ? '99+' : messages.length;
+        badge.style.display = 'flex';
+      }
+    }
+  }
+
+  async function sendCommunity() {
+    const input = document.getElementById('communityInput');
+    const content = input.value.trim();
+    if (!content) return;
+    if (!getToken()) { showToast('Vui lòng đăng nhập', 'error'); return; }
+    input.value = '';
+    try {
+      await apiPost('/community/messages', { content });
+      await loadCommunityMessages();
+    } catch (e) {
+      showToast(e.message || 'Gửi tin nhắn thất bại', 'error');
+      input.value = content;
+    }
+  }
+
   // ===== Helpers =====
   function escHtml(str) {
     if (!str) return '';
@@ -489,10 +728,7 @@
   function formatDate(iso) {
     if (!iso) return '';
     const d = new Date(iso);
-    return d.toLocaleString('vi-VN', {
-      day:'2-digit', month:'2-digit', year:'numeric',
-      hour:'2-digit', minute:'2-digit'
-    });
+    return d.toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
   }
 
   function formatTime(iso) {
@@ -515,16 +751,33 @@
     setTimeout(() => t.remove(), 3500);
   }
 
-  // Close overlay when clicking outside
+  // Close panels on outside click
+  document.addEventListener('click', function(e) {
+    const notifPanel = document.getElementById('notifPanel');
+    const notifBtn = document.querySelector('.notif-btn');
+    if (notifPanel && !notifPanel.contains(e.target) && !notifBtn?.contains(e.target)) {
+      notifPanel.classList.remove('show');
+    }
+    const commPanel = document.getElementById('communityPanel');
+    const commBtn = document.querySelector('.community-btn');
+    if (commPanel && !commPanel.contains(e.target) && !commBtn?.contains(e.target)) {
+      commPanel.classList.remove('show');
+    }
+  });
+
   document.getElementById('chatOverlay').addEventListener('click', function(e) {
     if (e.target === this) closeChat();
   });
 
-  // Make functions global
+  // Make global
   window.closeChat = closeChat;
   window.sendChat = sendChat;
   window.requestTicket = requestTicket;
   window.openChat = openChat;
+  window.toggleNotifPanel = toggleNotifPanel;
+  window.toggleCommunity = toggleCommunity;
+  window.sendCommunity = sendCommunity;
+  window.respondRequest = respondRequest;
 
   init();
 </script>

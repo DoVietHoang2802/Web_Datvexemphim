@@ -242,10 +242,35 @@ public class TicketMarketService {
         return new TicketRequestDTO(
                 r.getId(),
                 r.getTicket().getId(),
+                r.getTicket().getShowtime().getMovie().getTitle(),
+                r.getTicket().getShowtime().getStartTime().toString(),
+                r.getTicket().getShowtime().getRoom().getName(),
+                r.getTicket().getSeat().getSeatCode(),
+                r.getTicket().getShowtime().getPrice(),
                 r.getRequester().getId(),
                 r.getRequester().getFullName(),
                 r.getStatus(),
                 r.getCreatedAt()
         );
+    }
+
+    // ===== 5. THÔNG BÁO =====
+    public record NotificationCounts(long incomingRequests, long myRequests) {}
+
+    @Transactional(readOnly = true)
+    public NotificationCounts getNotificationCounts(Long userId) {
+        // Đếm request đang chờ trên vé của user
+        List<Ticket> myAvailableTickets = ticketRepository.findByOwnerIdAndStatus(userId, TicketStatus.AVAILABLE);
+        long incoming = 0;
+        for (Ticket t : myAvailableTickets) {
+            incoming += ticketRequestRepository.findByTicketIdAndStatusOrderByCreatedAtAsc(
+                    t.getId(), TicketRequestStatus.PENDING).size();
+        }
+
+        // Đếm request đang chờ của user
+        long myPending = ticketRequestRepository.findByRequesterIdAndStatusOrderByCreatedAtDesc(
+                userId, TicketRequestStatus.PENDING).size();
+
+        return new NotificationCounts(incoming, myPending);
     }
 }
