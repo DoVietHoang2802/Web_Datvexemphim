@@ -4,14 +4,20 @@ import com.datvexemphim.api.dto.admin.AdminShowtimeDto;
 import com.datvexemphim.api.dto.admin.ShowtimeUpsertRequest;
 import com.datvexemphim.domain.entity.Movie;
 import com.datvexemphim.domain.entity.Room;
+import com.datvexemphim.domain.entity.Seat;
 import com.datvexemphim.domain.entity.Showtime;
 import com.datvexemphim.domain.entity.Ticket;
 import com.datvexemphim.domain.enums.ShowtimeStatus;
 import com.datvexemphim.domain.enums.TicketStatus;
+import com.datvexemphim.domain.repository.ChatMessageRepository;
+import com.datvexemphim.domain.repository.FoodOrderRepository;
 import com.datvexemphim.domain.repository.MovieRepository;
 import com.datvexemphim.domain.repository.RoomRepository;
+import com.datvexemphim.domain.repository.SeatRepository;
 import com.datvexemphim.domain.repository.ShowtimeRepository;
 import com.datvexemphim.domain.repository.TicketRepository;
+import com.datvexemphim.domain.repository.TicketRequestRepository;
+import com.datvexemphim.domain.repository.TransferHistoryRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,17 +32,34 @@ public class AdminShowtimeService {
     private final MovieRepository movieRepository;
     private final RoomRepository roomRepository;
     private final TicketRepository ticketRepository;
+    private final TicketRequestRepository ticketRequestRepository;
+    private final TransferHistoryRepository transferHistoryRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final FoodOrderRepository foodOrderRepository;
+    private final SeatRepository seatRepository;
 
-    public AdminShowtimeService(ShowtimeRepository showtimeRepository, MovieRepository movieRepository, RoomRepository roomRepository, TicketRepository ticketRepository) {
+    public AdminShowtimeService(ShowtimeRepository showtimeRepository,
+                                MovieRepository movieRepository,
+                                RoomRepository roomRepository,
+                                TicketRepository ticketRepository,
+                                TicketRequestRepository ticketRequestRepository,
+                                TransferHistoryRepository transferHistoryRepository,
+                                ChatMessageRepository chatMessageRepository,
+                                FoodOrderRepository foodOrderRepository,
+                                SeatRepository seatRepository) {
         this.showtimeRepository = showtimeRepository;
         this.movieRepository = movieRepository;
         this.roomRepository = roomRepository;
         this.ticketRepository = ticketRepository;
+        this.ticketRequestRepository = ticketRequestRepository;
+        this.transferHistoryRepository = transferHistoryRepository;
+        this.chatMessageRepository = chatMessageRepository;
+        this.foodOrderRepository = foodOrderRepository;
+        this.seatRepository = seatRepository;
     }
 
     @Transactional
     public List<AdminShowtimeDto> list() {
-        // Hiển thị tất cả suất chiếu (ACTIVE và ENDED)
         return showtimeRepository.findAll().stream()
                 .map(s -> new AdminShowtimeDto(
                         s.getId(),
@@ -59,7 +82,7 @@ public class AdminShowtimeService {
 
     public Showtime create(ShowtimeUpsertRequest req) {
         Showtime st = new Showtime();
-        st.setStatus(ShowtimeStatus.ACTIVE); // Mặc định là ACTIVE
+        st.setStatus(ShowtimeStatus.ACTIVE);
         apply(st, req);
         return showtimeRepository.save(st);
     }
@@ -70,28 +93,69 @@ public class AdminShowtimeService {
         return showtimeRepository.save(st);
     }
 
+    @Transactional
     public void delete(Long id) {
-        showtimeRepository.deleteById(id);
+        Showtime st = showtimeRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Showtime not found"));
+
+        List<Ticket> tickets = ticketRepository.findByShowtimeId(id);
+        for (Ticket t : tickets) {
+            Long ticketId = t.getId();
+
+            // Giải phóng ghế
+            Seat seat = t.getSeat();
+            if (seat != null) {
+                seat.setActive(true);
+                seatRepository.save(seat);
+            }
+
+            // Xóa phụ thuộc trước để tránh lỗi FK 409
+            try { ticketRequestRepository.deleteByTicketId(ticketId); } catch (Exception ignored) {}
+            try { chatMessageRepository.deleteByTicketId(ticketId); } catch (Exception ignored) {}
+            try { transferHistoryRepository.deleteByTicketId(ticketId); } catch (Exception ignored) {}
+            try { foodOrderRepository.deleteByTicketId(ticketId); } catch (Exception ignored) {}
+
+            // bỏ liên kết payment trước khi xóa
+            if (t.getPayment() != null) {
+                t.setPayment(null);
+                ticketRepository.save(t);
+            }
+        }
+
+        ticketRepository.flush();
+        ticketRepository.deleteAll(tickets);
+        ticketRepository.flush();
+
+        st.setStatus(ShowtimeStatus.ENDED);
+        st.setCancelledAt(Instant.now());
+        showtimeRepository.save(st);
+        showtimeRepository.delete(st);
     }
 
     @Transactional
     public void end(Long id) {
         Showtime st = showtimeRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Showtime not found"));
+
         st.setStatus(ShowtimeStatus.ENDED);
         st.setCancelledAt(Instant.now());
-        
-        // Mark all tickets as cancelled for this showtime
-        List<Ticket> tickets = ticketRepository.findAll().stream()
-                .filter(t -> t.getShowtime().getId().equals(id) && !t.getStatus().equals(TicketStatus.CANCELLED))
-                .toList();
-        
+
+        List<Ticket> tickets = ticketRepository.findByShowtimeId(id);
         for (Ticket t : tickets) {
-            t.setStatus(TicketStatus.CANCELLED);
-            t.setCancelledAt(Instant.now());
-            ticketRepository.save(t);
+            if (t.getStatus() != TicketStatus.CANCELLED) {
+                t.setStatus(TicketStatus.CANCELLED);
+                t.setCancelledAt(Instant.now());
+
+                Seat seat = t.getSeat();
+                if (seat != null) {
+                    seat.setActive(true);
+                    seatRepository.save(seat);
+                }
+
+                ticketRepository.save(t);
+            }
         }
-        
+
         showtimeRepository.save(st);
     }
 
@@ -107,4 +171,3 @@ public class AdminShowtimeService {
         st.setPrice(req.price());
     }
 }
-

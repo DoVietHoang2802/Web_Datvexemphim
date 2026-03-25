@@ -20,6 +20,8 @@ public interface FoodOrderRepository extends JpaRepository<FoodOrder, Long> {
     
     @Query("SELECT fo FROM FoodOrder fo WHERE fo.ticket = :ticket")
     Optional<FoodOrder> findByTicket(@Param("ticket") Ticket ticket);
+
+    void deleteByTicketId(Long ticketId);
     
     @Query("SELECT fo FROM FoodOrder fo WHERE fo.originalBuyer = :user ORDER BY fo.createdAt DESC")
     List<FoodOrder> findByOriginalBuyer(@Param("user") User user);

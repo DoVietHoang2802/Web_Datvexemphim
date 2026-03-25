@@ -18,4 +18,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     /** Tin nhắn mới nhất của 1 vé */
     @Query("SELECT c FROM ChatMessage c WHERE c.ticket.id = :ticketId ORDER BY c.createdAt DESC LIMIT 1")
     ChatMessage findLatestByTicketId(@Param("ticketId") Long ticketId);
+
+    void deleteByTicketId(Long ticketId);
 }

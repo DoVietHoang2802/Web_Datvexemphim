@@ -39,5 +39,10 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     )
     @Query("SELECT t FROM Ticket t WHERE t.owner.id = :ownerId AND t.status = :status")
     List<Ticket> findByOwnerIdAndStatus(@Param("ownerId") Long ownerId, @Param("status") TicketStatus status);
+
+    @org.springframework.data.jpa.repository.EntityGraph(
+        attributePaths = {"showtime", "seat", "owner", "payment"}
+    )
+    List<Ticket> findByShowtimeId(Long showtimeId);
 }
 

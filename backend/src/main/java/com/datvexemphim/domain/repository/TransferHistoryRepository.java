@@ -10,5 +10,7 @@ public interface TransferHistoryRepository extends JpaRepository<TransferHistory
     
     @Query("SELECT th FROM TransferHistory th WHERE th.ticket.id = :ticketId")
     List<TransferHistory> findByTicketId(@Param("ticketId") Long ticketId);
+
+    void deleteByTicketId(Long ticketId);
 }
 
