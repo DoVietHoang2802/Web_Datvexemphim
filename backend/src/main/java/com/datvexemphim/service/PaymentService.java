@@ -79,8 +79,10 @@ public class PaymentService {
                 }
                 // Sinh mã vé QR nếu chưa có
                 if (t.getTicketCode() == null || t.getTicketCode().isBlank()) {
-                    String ticketCode = "VE" + System.currentTimeMillis() + String.format("%03d", t.getId());
-                    t.setTicketCode(ticketCode);
+                    Ticket saved = ticketRepository.save(t); // save trước để có ID
+                    String ticketCode = "VE" + saved.getId() + "X" + System.currentTimeMillis() % 10000;
+                    saved.setTicketCode(ticketCode);
+                    saved = ticketRepository.save(saved);
                 }
             }
             ticketRepository.saveAll(tickets);
