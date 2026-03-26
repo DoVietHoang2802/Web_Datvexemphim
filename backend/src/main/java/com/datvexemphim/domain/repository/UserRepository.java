@@ -13,7 +13,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     @Modifying
-    @Query("UPDATE User u SET u.enabled = true WHERE u.enabled IS NULL")
-    long fixEnabledForNullUsers();
+    @Query("UPDATE User u SET u.enabled = true WHERE u.enabled = false OR u.enabled IS NULL")
+    long enableAllUsers();
 }
 
