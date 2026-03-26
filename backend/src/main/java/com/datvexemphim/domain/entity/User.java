@@ -40,7 +40,7 @@ public class User {
     private Instant createdAt = Instant.now();
 
     @Column(nullable = false)
-    private boolean enabled = true;
+    private Boolean enabled = true;
 
     public Long getId() {
         return id;
@@ -90,7 +90,7 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public boolean isEnabled() { return enabled; }
+    public boolean isEnabled() { return enabled != null && enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
