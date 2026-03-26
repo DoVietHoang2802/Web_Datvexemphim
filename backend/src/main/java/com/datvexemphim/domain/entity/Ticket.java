@@ -44,6 +44,14 @@ public class Ticket {
 
     private Instant cancelledAt;
 
+    // Giá vé - vé tặng sẽ có price = 0
+    @Column(nullable = false)
+    private Long price = 0L;
+
+    // Vé tặng (mua 3 tặng 1)
+    @Column(nullable = false)
+    private boolean freebie = false;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Showtime getShowtime() { return showtime; }
@@ -60,5 +68,9 @@ public class Ticket {
     public void setBookedAt(Instant bookedAt) { this.bookedAt = bookedAt; }
     public Instant getCancelledAt() { return cancelledAt; }
     public void setCancelledAt(Instant cancelledAt) { this.cancelledAt = cancelledAt; }
+    public Long getPrice() { return price; }
+    public void setPrice(Long price) { this.price = price; }
+    public boolean isFreebie() { return freebie; }
+    public void setFreebie(boolean freebie) { this.freebie = freebie; }
 }
 

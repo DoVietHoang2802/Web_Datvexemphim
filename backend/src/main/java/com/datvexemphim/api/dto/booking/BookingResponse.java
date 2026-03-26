@@ -4,7 +4,8 @@ import java.util.List;
 
 public record BookingResponse(
         List<Long> ticketIds,
-        Long totalAmount
+        Long totalAmount,
+        String promoMessage
 ) {
 }
 

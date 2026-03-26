@@ -61,7 +61,14 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Một hoặc nhiều ghế đã được đặt.");
         }
 
-        List<Ticket> tickets = seats.stream().map(seat -> {
+        int totalSeats = seats.size();
+        int freebies = totalSeats / 3;  // Mua 3 tặng 1: cứ 3 vé → 1 vé free
+        int paidSeats = totalSeats - freebies;
+        long pricePerSeat = showtime.getPrice();
+        long total = pricePerSeat * paidSeats;  // Chỉ tính tiền vé mua, vé tặng = 0
+
+        // Ghế đầu tiên = vé mua, ghế cuối = vé tặng
+        List<Ticket> tickets = seats.stream().map((Seat seat) -> {
             Ticket t = new Ticket();
             t.setShowtime(showtime);
             t.setSeat(seat);
@@ -70,11 +77,26 @@ public class BookingService {
             return t;
         }).toList();
 
+        // Đánh dấu vé tặng (ghế cuối = freebie)
+        for (int i = 0; i < freebies; i++) {
+            Ticket free = tickets.get(tickets.size() - 1 - i);
+            free.setPrice(0L);
+            free.setFreebie(true);
+        }
+
+        // Vé mua giữ nguyên giá
+        for (int i = 0; i < paidSeats; i++) {
+            tickets.get(i).setPrice(pricePerSeat);
+            tickets.get(i).setFreebie(false);
+        }
+
         ticketRepository.saveAll(tickets);
 
-        long total = showtime.getPrice() * tickets.size();
         List<Long> ids = tickets.stream().map(Ticket::getId).toList();
-        return new BookingResponse(ids, total);
+        String promoMsg = freebies > 0
+                ? "🎉 Mua " + totalSeats + " vé, tặng " + freebies + " vé! Tiết kiệm " + (freebies * pricePerSeat) + "đ"
+                : null;
+        return new BookingResponse(ids, total, promoMsg);
     }
 }
 
