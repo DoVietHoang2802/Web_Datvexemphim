@@ -19,7 +19,7 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         // Fix enabled=false/null for all existing users (new column defaulting to false)
-        long fixed = userRepository.enableAllUsers();
+        int fixed = userRepository.enableAllUsers();
         if (fixed > 0) {
             log.info("Fixed {} users with enabled=false", fixed);
         }
