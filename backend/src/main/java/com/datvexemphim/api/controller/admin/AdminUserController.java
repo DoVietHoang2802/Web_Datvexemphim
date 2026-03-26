@@ -52,5 +52,15 @@ public class AdminUserController {
     public AdminUserDto resetPassword(@PathVariable Long id, @RequestParam String newPassword) {
         return adminUserService.resetPassword(id, newPassword);
     }
+
+    @PostMapping("/{id}/lock")
+    public AdminUserDto lock(@PathVariable Long id) {
+        return adminUserService.lock(id);
+    }
+
+    @PostMapping("/{id}/unlock")
+    public AdminUserDto unlock(@PathVariable Long id) {
+        return adminUserService.unlock(id);
+    }
 }
 

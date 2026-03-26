@@ -53,11 +53,18 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest req) {
+        User user = userRepository.findByEmail(req.email().toLowerCase())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Email hoặc mật khẩu không đúng."));
+
+        if (!user.isEnabled()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.");
+        }
+
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.email().toLowerCase(), req.password())
         );
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
-        User user = principal.getUser();
+        user = principal.getUser();
         String token = jwtService.generateAccessToken(user.getEmail(), Map.of("role", user.getRole().name()));
         return AuthResponse.bearer(token, user.getId(), user.getFullName(), user.getEmail(), user.getRole().name());
     }
@@ -76,6 +83,10 @@ public class AuthService {
             user.setRole(Role.USER);
             user.setProvider(AuthProvider.GOOGLE);
             userRepository.save(user);
+        }
+
+        if (!user.isEnabled()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên.");
         }
 
         String token = jwtService.generateAccessToken(user.getEmail(), Map.of("role", user.getRole().name()));

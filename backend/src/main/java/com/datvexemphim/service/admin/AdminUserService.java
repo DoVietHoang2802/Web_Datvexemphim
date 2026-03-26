@@ -24,14 +24,14 @@ public class AdminUserService {
 
     public List<AdminUserDto> list() {
         return userRepository.findAll().stream()
-                .map(u -> new AdminUserDto(u.getId(), u.getFullName(), u.getEmail(), u.getRole().name(), u.getCreatedAt()))
+                .map(u -> new AdminUserDto(u.getId(), u.getFullName(), u.getEmail(), u.getRole().name(), u.getCreatedAt(), u.isEnabled()))
                 .toList();
     }
 
     public AdminUserDto get(Long id) {
         User u = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        return new AdminUserDto(u.getId(), u.getFullName(), u.getEmail(), u.getRole().name(), u.getCreatedAt());
+        return new AdminUserDto(u.getId(), u.getFullName(), u.getEmail(), u.getRole().name(), u.getCreatedAt(), u.isEnabled());
     }
 
     public AdminUserDto create(AdminUserUpsertRequest req) {
@@ -47,7 +47,7 @@ public class AdminUserService {
         u.setPasswordHash(passwordEncoder.encode(req.password()));
         u.setRole(Role.valueOf(req.role()));
         User saved = userRepository.save(u);
-        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt());
+        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt(), saved.isEnabled());
     }
 
     public AdminUserDto update(Long id, AdminUserUpsertRequest req) {
@@ -63,7 +63,7 @@ public class AdminUserService {
             u.setPasswordHash(passwordEncoder.encode(req.password()));
         }
         User saved = userRepository.save(u);
-        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt());
+        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt(), saved.isEnabled());
     }
 
     public void delete(Long id) {
@@ -75,7 +75,7 @@ public class AdminUserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         u.setRole(Role.valueOf(newRole));
         User saved = userRepository.save(u);
-        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt());
+        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt(), saved.isEnabled());
     }
 
     public AdminUserDto resetPassword(Long id, String newPassword) {
@@ -86,7 +86,23 @@ public class AdminUserService {
         }
         u.setPasswordHash(passwordEncoder.encode(newPassword));
         User saved = userRepository.save(u);
-        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt());
+        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt(), saved.isEnabled());
+    }
+
+    public AdminUserDto lock(Long id) {
+        User u = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        u.setEnabled(false);
+        User saved = userRepository.save(u);
+        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt(), saved.isEnabled());
+    }
+
+    public AdminUserDto unlock(Long id) {
+        User u = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        u.setEnabled(true);
+        User saved = userRepository.save(u);
+        return new AdminUserDto(saved.getId(), saved.getFullName(), saved.getEmail(), saved.getRole().name(), saved.getCreatedAt(), saved.isEnabled());
     }
 }
 

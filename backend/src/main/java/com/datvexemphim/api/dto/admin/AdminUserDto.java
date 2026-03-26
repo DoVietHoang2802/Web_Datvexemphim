@@ -7,7 +7,8 @@ public record AdminUserDto(
         String fullName,
         String email,
         String role,
-        Instant createdAt
+        Instant createdAt,
+        boolean enabled
 ) {
 }
 
