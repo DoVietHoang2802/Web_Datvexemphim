@@ -145,7 +145,7 @@ function ticketCard(t) {
       '</div>' +
       '<div class="ticket-price">' +
         '<div class="ticket-total">' + formatVnd(totalPrice) + '</div>' +
-        statusBadge +
+        statusBadge + ' ' + qrBtn +
         '<div class="ticket-details-toggle"><i class="fas fa-chevron-down"></i></div>' +
       '</div>' +
     '</div>' +
@@ -157,7 +157,7 @@ function ticketCard(t) {
       '<p class="mb-1 text-muted small">Giá vé: ' + formatVnd(t.price) + '</p>' +
       (t.ticketCode ? '<p class="mb-1 text-muted small">Mã vé: <strong>' + t.ticketCode + '</strong></p>' : '') +
       foodHtml +
-      '<div class="ticket-actions mt-2">' + qrBtn + payBtn + listBtn + unlistBtn + cancelBtn + deleteBtn + '</div>' +
+      '<div class="ticket-actions mt-2">' + payBtn + listBtn + unlistBtn + cancelBtn + deleteBtn + '</div>' +
     '</div>' +
   '</div>';
 }
