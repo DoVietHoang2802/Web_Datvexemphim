@@ -87,8 +87,9 @@ public class TicketService {
                 t.getShowtime().getMovie().getTitle(),
                 t.getShowtime().getRoom().getName(),
                 t.getSeat().getSeatCode(),
-                t.getShowtime().getPrice(),
+                t.getPrice() != null ? t.getPrice() : t.getShowtime().getPrice(),
                 t.getPayment() == null ? null : t.getPayment().getBookingCode(),
+                t.getTicketCode(),
                 foodOrderId,
                 foodTotalPrice,
                 foodOrderStatus,
@@ -183,4 +184,50 @@ public class TicketService {
 
         foodOrderService.handleTicketTransfer(t.getId(), toUser.getId(), savedTransferHistory.getId());
     }
+
+    /**
+     * Verify ticket by QR code and check-in if valid.
+     * Returns ticket info or error.
+     */
+    public Object verifyByCode(String code) {
+        Ticket t = ticketRepository.findByTicketCode(code);
+        if (t == null) {
+            return new VerifyResult(false, null, "Mã vé không tồn tại.", null);
+        }
+        if (t.getStatus() == TicketStatus.CANCELLED) {
+            return new VerifyResult(false, ticketInfo(t), "Vé đã bị hủy.", t.getCancelledAt());
+        }
+        if (t.getUsedAt() != null) {
+            return new VerifyResult(false, ticketInfo(t), "Vé đã được sử dụng lúc " + t.getUsedAt(), t.getUsedAt());
+        }
+        if (t.getStatus() != TicketStatus.CONFIRMED) {
+            return new VerifyResult(false, null, "Vé chưa được thanh toán.", null);
+        }
+        // Check-in: đánh dấu đã quét
+        t.setUsedAt(Instant.now());
+        ticketRepository.save(t);
+        return new VerifyResult(true, ticketInfo(t), "Vé hợp lệ! Mời vào rạp.", t.getUsedAt());
+    }
+
+    private Object ticketInfo(Ticket t) {
+        return new TicketInfo(
+                t.getId(),
+                t.getTicketCode(),
+                t.getShowtime().getMovie().getTitle(),
+                t.getShowtime().getStartTime(),
+                t.getShowtime().getRoom().getName(),
+                t.getSeat().getSeatCode(),
+                t.getOwner().getFullName(),
+                t.getOwner().getEmail(),
+                t.getStatus().name(),
+                t.getPrice(),
+                t.isFreebie(),
+                t.getUsedAt()
+        );
+    }
+
+    public record VerifyResult(boolean valid, Object ticketInfo, String message, Object usedAt) {}
+    public record TicketInfo(Long id, String ticketCode, String movieTitle, Instant showtimeStart,
+                             String roomName, String seatCode, String ownerName, String ownerEmail,
+                             String status, Long price, boolean freebie, Instant usedAt) {}
 }

@@ -52,6 +52,13 @@ public class Ticket {
     @Column(nullable = false)
     private boolean freebie = false;
 
+    // Mã vé QR - sinh khi thanh toán thành công
+    @Column(unique = true, length = 30)
+    private String ticketCode;
+
+    // Thời gian đã quét vé (check-in)
+    private Instant usedAt;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Showtime getShowtime() { return showtime; }
@@ -72,5 +79,9 @@ public class Ticket {
     public void setPrice(Long price) { this.price = price; }
     public boolean isFreebie() { return freebie; }
     public void setFreebie(boolean freebie) { this.freebie = freebie; }
+    public String getTicketCode() { return ticketCode; }
+    public void setTicketCode(String ticketCode) { this.ticketCode = ticketCode; }
+    public Instant getUsedAt() { return usedAt; }
+    public void setUsedAt(Instant usedAt) { this.usedAt = usedAt; }
 }
 

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quét Vé - DATVEXEMPHIM</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f23;
+      --card: #1a1a2e;
+      --border: rgba(255,255,255,0.08);
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
+    }
+    body {
+      background: var(--bg);
+      color: #fff;
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      padding: 1.5rem;
+      border-radius: 0 0 1rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .scanner-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      overflow: hidden;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    #qr-reader {
+      width: 100%;
+    }
+    #qr-reader video {
+      width: 100% !important;
+      border-radius: 0;
+    }
+    .result-panel {
+      border-radius: 1rem;
+      padding: 1.5rem;
+      text-align: center;
+      border: 2px solid;
+      max-width: 480px;
+      margin: 1rem auto;
+      transition: all 0.3s;
+    }
+    .result-panel.valid {
+      border-color: var(--success);
+      background: rgba(16,185,129,0.1);
+    }
+    .result-panel.invalid {
+      border-color: var(--error);
+      background: rgba(239,68,68,0.1);
+    }
+    .result-panel.warning {
+      border-color: var(--warning);
+      background: rgba(245,158,11,0.1);
+    }
+    .result-icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+    .result-msg {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .result-detail {
+      background: rgba(255,255,255,0.05);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    .result-detail .row {
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .result-detail .row:last-child { border-bottom: none; }
+    .detail-label {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.8rem;
+    }
+    .detail-value {
+      font-weight: 600;
+      text-align: right;
+    }
+    .btn-scan {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      color: #fff;
+      border-radius: 0.75rem;
+      padding: 0.75rem 2rem;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      max-width: 480px;
+      display: block;
+      margin: 1rem auto;
+    }
+    .btn-scan:hover { opacity: 0.85; }
+    .btn-scan:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .scanner-region {
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #111;
+      position: relative;
+    }
+    .scanner-placeholder {
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+    }
+    .scanner-placeholder i {
+      font-size: 4rem;
+      margin-bottom: 0.5rem;
+    }
+    .scanner-controls {
+      padding: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .camera-select {
+      width: 100%;
+      background: #141428;
+      border: 1px solid var(--border);
+      color: #fff;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+    }
+    .toast-box {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .toast {
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-weight: 600;
+      animation: slideIn 0.2s ease;
+      min-width: 250px;
+    }
+    .toast.error { background: var(--error); }
+    .toast.success { background: var(--success); }
+    .toast.info { background: #667eea; }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="header">
+    <div class="container text-center">
+      <h4><i class="fas fa-qrcode me-2"></i>Quét Vé QR</h4>
+      <p class="mb-0 text-white-50">Quét mã QR trên vé để xác nhận vào rạp</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Scanner -->
+    <div class="scanner-box">
+      <div class="scanner-region" id="scannerRegion">
+        <div class="scanner-placeholder" id="scannerPlaceholder">
+          <i class="fas fa-camera"></i>
+          <div>Bật camera để quét QR</div>
+        </div>
+        <div id="qr-reader"></div>
+      </div>
+      <div class="scanner-controls">
+        <select class="camera-select" id="cameraSelect" style="display:none;">
+          <option value="">Chọn camera...</option>
+        </select>
+        <button class="btn btn-outline-light w-100 mt-2" id="toggleCamera">
+          <i class="fas fa-camera me-1"></i> Bật Camera
+        </button>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-panel" id="resultPanel" style="display:none;">
+      <div class="result-icon" id="resultIcon"></div>
+      <div class="result-msg" id="resultMsg"></div>
+      <div class="result-detail" id="resultDetail"></div>
+    </div>
+  </div>
+
+  <div class="toast-box" id="toastBox"></div>
+
+  <!-- QR Code Scanner Library -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script>
+    let html5QrCode = null;
+    let isScanning = false;
+    let lastScanned = null;
+    let scanCooldown = false;
+
+    const API_BASE = 'https://webdatvexemphim-production.up.railway.app';
+
+    async function loadNavbar() {
+      try {
+        const res = await fetch('../partials/navbar.html');
+        document.getElementById('navbar').innerHTML = await res.text();
+      } catch(e) {}
+    }
+
+    function showToast(msg, type = 'info') {
+      const box = document.getElementById('toastBox');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      box.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      return new Date(iso).toLocaleString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function showResult(valid, msg, ticketInfo) {
+      const panel = document.getElementById('resultPanel');
+      const icon = document.getElementById('resultIcon');
+      const msgEl = document.getElementById('resultMsg');
+      const detail = document.getElementById('resultDetail');
+
+      panel.style.display = 'block';
+      panel.className = `result-panel ${valid ? 'valid' : (ticketInfo ? 'warning' : 'invalid')}`;
+      icon.innerHTML = valid ? '<i class="fas fa-check-circle" style="color:#10b981"></i>' : '<i class="fas fa-times-circle" style="color:#ef4444"></i>';
+      msgEl.textContent = msg;
+      msgEl.style.color = valid ? '#10b981' : '#ef4444';
+
+      if (ticketInfo) {
+        detail.innerHTML = `
+          <div class="row"><span class="detail-label">Mã vé</span><span class="detail-value">${ticketInfo.ticketCode || '—'}</span></div>
+          <div class="row"><span class="detail-label">Phim</span><span class="detail-value">${ticketInfo.movieTitle || '—'}</span></div>
+          <div class="row"><span class="detail-label">Phòng</span><span class="detail-value">${ticketInfo.roomName || '—'}</span></div>
+          <div class="row"><span class="detail-label">Ghế</span><span class="detail-value">${ticketInfo.seatCode || '—'} ${ticketInfo.freebie ? '🎁' : ''}</span></div>
+          <div class="row"><span class="detail-label">Suất chiếu</span><span class="detail-value">${formatDate(ticketInfo.showtimeStart)}</span></div>
+          <div class="row"><span class="detail-label">Chủ vé</span><span class="detail-value">${ticketInfo.ownerName || '—'}</span></div>
+          <div class="row"><span class="detail-label">Trạng thái</span><span class="detail-value">${ticketInfo.status || '—'}</span></div>
+        `;
+      } else {
+        detail.innerHTML = '';
+      }
+    }
+
+    async function verifyTicket(code) {
+      // Tránh quét lại cùng 1 mã trong 3 giây
+      if (scanCooldown) return;
+      scanCooldown = true;
+      setTimeout(() => { scanCooldown = false; }, 3000);
+
+      try {
+        const resp = await fetch(`${API_BASE}/api/tickets/verify?code=${encodeURIComponent(code)}`);
+        const data = await resp.json();
+
+        if (data.valid) {
+          showResult(true, data.message, data.ticketInfo);
+          // Phát âm thanh thành công
+          new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQoGAACBhYqFbF1fdH2JkI2Ff3Z4gIaKjYuGgXx6fYKHi42LiIR/fH2AgYWIi4qIhYB9f4GDh4qMi4qFgYB/goOHi42LiYWBAK4=').play().catch(() => {});
+        } else {
+          showResult(false, data.message, data.ticketInfo);
+          // Phát âm thanh thất bại
+          new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQoGAAB/gH9+fX5/gIGBgX9+fX5/gIGBf35+fn+AgIF/fn5+f4CAgH9+fn5/gICAf35+fn+AgIB/fn5+f4CAgH9+fn5/gICAf35+fn+AgIB/fn5+f4CAgH8=').play().catch(() => {});
+        }
+      } catch(e) {
+        showResult(false, 'Lỗi kết nối máy chủ!', null);
+      }
+    }
+
+    async function startScanner() {
+      const btn = document.getElementById('toggleCamera');
+      btn.disabled = true;
+
+      if (isScanning && html5QrCode) {
+        html5QrCode.stop().then(() => {
+          isScanning = false;
+          btn.innerHTML = '<i class="fas fa-camera me-1"></i> Bật Camera';
+          btn.disabled = false;
+          document.getElementById('qr-reader').style.display = 'none';
+          document.getElementById('scannerPlaceholder').style.display = 'flex';
+        });
+        return;
+      }
+
+      try {
+        html5QrCode = new Html5Qrcode("qr-reader");
+
+        // Lấy danh sách camera
+        const devices = await Html5Qrcode.getCameras();
+        const select = document.getElementById('cameraSelect');
+        select.style.display = 'block';
+        select.innerHTML = '<option value="">Chọn camera...</option>';
+        devices.forEach(d => {
+          const label = d.label || `Camera ${d.id}`;
+          const option = document.createElement('option');
+          option.value = d.id;
+          // Ưu tiên camera sau (thường là camera trước trên điện thoại)
+          option.text = label.toLowerCase().includes('back') || label.toLowerCase().includes('sau')
+            ? label + ' (sau)' : label + ' (trước)';
+          if (label.toLowerCase().includes('back') || label.toLowerCase().includes('sau')) {
+            option.selected = true;
+          }
+          select.appendChild(option);
+        });
+
+        const cameraId = select.value || (devices.length > 0 ? devices[devices.length-1].id : null);
+        if (!cameraId) {
+          showToast('Không tìm thấy camera!', 'error');
+          btn.disabled = false;
+          return;
+        }
+
+        document.getElementById('scannerPlaceholder').style.display = 'none';
+        document.getElementById('qr-reader').style.display = 'block';
+
+        await html5QrCode.start(
+          cameraId,
+          { fps: 10, qrbox: { width: 250, height: 250 } },
+          (decodedText) => {
+            // Khi quét được QR
+            verifyTicket(decodedText.trim());
+          },
+          () => {} // Lỗi quét bỏ qua
+        );
+
+        isScanning = true;
+        btn.innerHTML = '<i class="fas fa-stop me-1"></i> Tắt Camera';
+        btn.disabled = false;
+
+      } catch (e) {
+        console.error('Scanner error:', e);
+        showToast('Không thể bật camera: ' + e.message, 'error');
+        btn.innerHTML = '<i class="fas fa-camera me-1"></i> Bật Camera';
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById('toggleCamera').addEventListener('click', startScanner);
+
+    // Khi chọn camera khác
+    document.getElementById('cameraSelect').addEventListener('change', async (e) => {
+      if (!e.target.value || !isScanning) return;
+      if (html5QrCode) {
+        await html5QrCode.stop();
+        isScanning = false;
+      }
+      await startScanner();
+    });
+
+    // Test manual input
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 't' && e.ctrlKey) {
+        e.preventDefault();
+        const code = prompt('Nhập mã vé để test:');
+        if (code) verifyTicket(code.trim());
+      }
+    });
+
+    loadNavbar();
+  </script>
+</body>
+</html>

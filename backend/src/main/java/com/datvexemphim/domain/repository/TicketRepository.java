@@ -48,5 +48,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     /** Đếm vé chưa bị hủy của 1 suất chiếu */
     @Query("SELECT COUNT(t) FROM Ticket t WHERE t.showtime.id = :showtimeId AND t.status <> 'CANCELLED'")
     long countNonCancelledByShowtimeId(@Param("showtimeId") Long showtimeId);
+
+    @Query("SELECT t FROM Ticket t JOIN FETCH t.showtime s JOIN FETCH s.movie JOIN FETCH s.room JOIN FETCH t.seat JOIN FETCH t.owner WHERE t.ticketCode = :code")
+    Ticket findByTicketCode(@Param("code") String code);
 }
 

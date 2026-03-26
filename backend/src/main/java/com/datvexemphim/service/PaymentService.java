@@ -53,8 +53,8 @@ public class PaymentService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Chỉ ticket PENDING mới được thanh toán.");
         }
 
-        // Calculate ticket total
-        long ticketAmount = tickets.stream().mapToLong(t -> t.getShowtime().getPrice()).sum();
+        // Calculate ticket total (dùng ticket.price vì vé tặng = 0)
+        long ticketAmount = tickets.stream().mapToLong(t -> t.getPrice() != null ? t.getPrice() : 0).sum();
 
         String bookingCode = "BK-" + UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase();
 
@@ -76,6 +76,11 @@ public class PaymentService {
                 if (t.getSeat() != null) {
                     t.getSeat().setActive(false);
                     seatRepository.save(t.getSeat());
+                }
+                // Sinh mã vé QR nếu chưa có
+                if (t.getTicketCode() == null || t.getTicketCode().isBlank()) {
+                    String ticketCode = "VE" + System.currentTimeMillis() + String.format("%03d", t.getId());
+                    t.setTicketCode(ticketCode);
                 }
             }
             ticketRepository.saveAll(tickets);

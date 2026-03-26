@@ -45,5 +45,11 @@ public class TicketController {
     public void delete(@PathVariable Long ticketId) {
         ticketService.delete(ticketId, currentUserService.requireUser());
     }
+
+    /** Verify ticket by code (public - used by QR scan) */
+    @GetMapping("/verify")
+    public Object verify(@RequestParam String code) {
+        return ticketService.verifyByCode(code);
+    }
 }
 

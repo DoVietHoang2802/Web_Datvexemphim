@@ -16,6 +16,7 @@ public record TicketHistoryDto(
         String seatCode,
         Long price,
         String bookingCode,
+        String ticketCode,
         // Food order info
         Long foodOrderId,
         BigDecimal foodTotalPrice,
