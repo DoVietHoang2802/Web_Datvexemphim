@@ -3,20 +3,54 @@ const API_BASE = typeof CONFIG !== 'undefined' && CONFIG.API_BASE
   ? CONFIG.API_BASE
   : 'https://webdatvexemphim-production.up.railway.app/api';
 
+// ===== TOKEN HELPERS (same as api.js - cookie fallback for Tracking Prevention) =====
+function getCookie(name) {
+  try {
+    var parts = document.cookie.split(';');
+    for (var i = 0; i < parts.length; i++) {
+      var kv = parts[i].split('=');
+      if (kv[0].trim() === name) return decodeURIComponent(kv[1] || '');
+    }
+  } catch(e) {}
+  return null;
+}
+
+function getToken() {
+  try { var t = localStorage.getItem('token'); if (t) return t; } catch(e) {}
+  return getCookie('token');
+}
+
+function setAuth(data) {
+  try { localStorage.setItem('token', data.token || data.accessToken || ''); } catch(e) {}
+  try { localStorage.setItem('userId', data.userId || ''); } catch(e) {}
+  try { localStorage.setItem('userRole', data.role || 'USER'); } catch(e) {}
+  try { localStorage.setItem('userFullName', data.fullName || ''); } catch(e) {}
+  // cookie fallback
+  var exp = new Date(); exp.setTime(exp.getTime() + 7 * 86400000);
+  var cookieStr = function(name, val) {
+    try { document.cookie = name + '=' + encodeURIComponent(val) + ';expires=' + exp.toUTCString() + ';path=/;SameSite=Lax'; } catch(e) {}
+  };
+  cookieStr('token', data.token || data.accessToken || '');
+  cookieStr('userId', data.userId || '');
+  cookieStr('userRole', data.role || 'USER');
+  cookieStr('userFullName', data.fullName || '');
+}
+
 let allTickets = [];
 let currentFilter = 'all';
 
-function showToast(msg, type = 'error') {
-  const el = document.createElement('div');
-  el.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:8px;color:#fff;font-weight:600;animation:slideIn 0.2s';
+function showToast(msg, type) {
+  if (type === undefined) type = 'error';
+  var el = document.createElement('div');
+  el.style.cssText = 'position:fixed;top:20px;right:20px;z-index:99999;padding:12px 20px;border-radius:8px;color:#fff;font-weight:600;';
   el.style.background = type === 'success' ? '#22c55e' : '#ef4444';
   el.textContent = msg;
   document.body.appendChild(el);
-  setTimeout(() => { el.style.opacity = 0; setTimeout(() => el.remove(), 200); }, 2500);
+  setTimeout(function() { el.style.opacity = '0'; setTimeout(function() { el.remove(); }, 200); }, 2500);
 }
 
 async function loadNavbar(){
-  const html = await fetch('./partials/navbar.html').then(r=>r.text());
+  var html = await fetch('./partials/navbar.html').then(function(r) { return r.text(); });
   document.querySelector('#navbar').innerHTML = html;
   if (typeof setupNavbar === 'function') setupNavbar();
 }
@@ -202,30 +236,47 @@ function filterTickets(filter) {
 }
 
 async function apiGet(path) {
-  var token = localStorage.getItem('token');
+  var token = getToken();
   var res = await fetch(API_BASE + path, {
-    headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+    headers: {
+      'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
+      'Authorization': token ? 'Bearer ' + token : ''
+    }
   });
-  if (!res.ok) throw new Error('Lỗi ' + res.status);
+  if (!res.ok) {
+    if (res.status === 401) {
+      // Token invalid - clear and show login
+      var errMsg = 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.';
+      document.querySelector('#ticketsList').innerHTML = '<div class="empty-state"><i class="fas fa-ticket-alt"></i><h5>' + errMsg + '</h5><a class="btn btn-brand mt-3" href="login.html">Đăng nhập</a></div>';
+      return [];
+    }
+    throw new Error('Lỗi ' + res.status);
+  }
   return res.json();
 }
 
 async function apiDelete(path) {
-  var token = localStorage.getItem('token');
+  var token = getToken();
   var res = await fetch(API_BASE + path, {
     method: 'DELETE',
-    headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+    headers: {
+      'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
+      'Authorization': token ? 'Bearer ' + token : ''
+    }
   });
   if (!res.ok) throw new Error('Lỗi ' + res.status);
   return res.json();
 }
 
 async function apiPost(path, body) {
-  var token = localStorage.getItem('token');
+  var token = getToken();
   var res = await fetch(API_BASE + path, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
       'Authorization': token ? 'Bearer ' + token : ''
     },
     body: JSON.stringify(body)
@@ -270,9 +321,10 @@ async function handleAction(action, id) {
 }
 
 async function main() {
-  var token = localStorage.getItem('token');
+  var token = getToken();
   if (!token) {
     document.querySelector('#ticketsList').innerHTML = '<div class="empty-state"><i class="fas fa-ticket-alt"></i><h5>Vui lòng đăng nhập để xem vé</h5><a class="btn btn-brand mt-3" href="login.html">Đăng nhập</a></div>';
+    await loadNavbar();
     return;
   }
   await loadNavbar();
