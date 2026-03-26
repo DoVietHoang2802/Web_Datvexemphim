@@ -272,7 +272,7 @@ async function handleAction(action, id) {
 async function main() {
   var token = localStorage.getItem('token');
   if (!token) {
-    location.href = 'login.html';
+    document.querySelector('#ticketsList').innerHTML = '<div class="empty-state"><i class="fas fa-ticket-alt"></i><h5>Vui lòng đăng nhập để xem vé</h5><a class="btn btn-brand mt-3" href="login.html">Đăng nhập</a></div>';
     return;
   }
   await loadNavbar();
