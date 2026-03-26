@@ -69,7 +69,7 @@ Header: ✅ Auth
 ### Cập nhật profile
 ```
 PUT /api/user/profile
-Header: ✅ Auth
+Header: ✅ Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJpc3MiOiJkYXR2ZXhlbXBoaW0iLCJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwicm9sZSI6IlVTRVIiLCJpYXQiOjE3NzQ0NTEzMjUsImV4cCI6MTc3NDQ2NTcyNX0.10Q5-rhPMU6hmiIq3CcGTqqCr6wDZfDzKesu-uSixEWooESqSdspiqulGEqlx_xf
 Body: {
   "fullName": "Nguyen Van B",
   "phone": "0909123456",
@@ -82,8 +82,9 @@ Body: {
 POST /api/user/change-password
 Header: ✅ Auth
 Body: {
-  "currentPassword": "old123",
-  "newPassword": "new123"
+  "currentPassword": "newpassword123",
+  "newPassword": "newpassword12345",
+  "confirmPassword": "newpassword12345"
 }
 ```
 
@@ -279,42 +280,7 @@ GET /api/food/items/{id}
 ```
 
 ### Tạo đơn đồ ăn
-```
-POST /api/food/orders
-Header: ✅ Auth
-Body: {
-  "ticketId": 1,
-  "items": [
-    { "foodItemId": 1, "quantity": 2 },
-    { "foodItemId": 3, "quantity": 1 }
-  ]
-}
-```
-
-### Đơn đồ ăn của tôi
-```
-GET /api/food/orders
-Header: ✅ Auth
-```
-
-### Đơn theo ID
-```
-GET /api/food/orders/{id}
-Header: ✅ Auth
-```
-
-### Đơn theo ticket
-```
-GET /api/food/orders/ticket/{ticketId}
-Header: ✅ Auth
-```
-
-### Hủy đơn
-```
-DELETE /api/food/orders/{id}
-Header: ✅ Auth
-```
-
+Cần có vé đặt mới tạo đơn được 
 ---
 
 ## ⭐ 10. REVIEW - Đánh giá phim

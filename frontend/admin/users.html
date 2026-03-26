@@ -25,6 +25,7 @@
               <th>Email</th>
               <th>Tên đầy đủ</th>
               <th>Vài trò</th>
+              <th>Trạng thái</th>
               <th>Tọa tạo</th>
               <th class="text-end">Tác vụ</th>
             </tr>
@@ -48,14 +49,23 @@
       document.querySelector("#msg").innerHTML = `<div class="alert alert-${type} py-2">${msg}</div>`;
     }
     function row(u){
+      const isLocked = !u.enabled;
       return `
-        <tr>
+        <tr class="${isLocked ? "table-secondary" : ""}">
           <td>${u.id}</td>
           <td>${u.email}</td>
           <td>${u.fullName}</td>
           <td><span class="badge ${u.role==="ADMIN" ? "text-bg-warning" : "text-bg-secondary"}">${u.role}</span></td>
+          <td>
+            ${isLocked
+              ? '<span class="badge text-bg-danger">Bị khóa</span>'
+              : '<span class="badge text-bg-success">Hoạt động</span>'}
+          </td>
           <td class="small">${formatTime(u.createdAt)}</td>
           <td class="text-end">
+            ${isLocked
+              ? `<button class="btn btn-sm btn-admin btn-outline-success me-1" data-action="unlock" data-id="${u.id}">🔓 Mở khóa</button>`
+              : `<button class="btn btn-sm btn-admin btn-outline-dark me-1" data-action="lock" data-id="${u.id}" ${u.role==="ADMIN" ? "disabled" : ""}>🔒 Khóa</button>`}
             <button class="btn btn-sm btn-admin btn-outline-info me-1" data-action="change-role" data-id="${u.id}">🔑 Quyền</button>
             <button class="btn btn-sm btn-admin btn-outline-warning me-1" data-action="reset-password" data-id="${u.id}">🔐 Mật khẩu</button>
             <button class="btn btn-sm btn-admin btn-outline-danger" data-action="delete" data-id="${u.id}" ${u.role==="ADMIN" ? "disabled" : ""}>🗑️ Xóa</button>
@@ -65,7 +75,7 @@
     }
     async function refresh(){
       const list = await apiGet("/admin/users");
-      document.querySelector("#tbody").innerHTML = list.map(row).join("") || `<tr><td colspan="6" class="text-muted">Không có dữ liệu</td></tr>`;
+      document.querySelector("#tbody").innerHTML = list.map(row).join("") || `<tr><td colspan="7" class="text-muted">Không có dữ liệu</td></tr>`;
     }
     async function main(){
       requireAdmin();
@@ -110,6 +120,24 @@
           } else if(newPassword) {
             show("❌ Mật khẩu phải có tối thiểu 6 ký tự.", "danger");
           }
+        }
+
+        if(action === "lock"){
+          showConfirmModal("Khóa tài khoản?", "Người dùng sẽ không thể đăng nhập cho đến khi được mở khóa.", async () => {
+            try{
+              await apiPost(`/admin/users/${id}/lock`);
+              show("✅ Đã khóa tài khoản.", "success");
+              await refresh();
+            }catch(err){ show("❌ Lỗi khóa: " + (err.message || err)); }
+          }, "Khóa", "btn-admin-danger");
+        }
+
+        if(action === "unlock"){
+          try{
+            await apiPost(`/admin/users/${id}/unlock`);
+            show("✅ Đã mở khóa tài khoản.", "success");
+            await refresh();
+          }catch(err){ show("❌ Lỗi mở khóa: " + (err.message || err)); }
         }
       });
     }
